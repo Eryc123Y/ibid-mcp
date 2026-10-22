@@ -1,0 +1,12 @@
+{
+  "name": "ibid",
+  "version": "0.0.1",
+  "description": "Self-hosted MCP server for scholarly literature search across Semantic Scholar, OpenAlex, arXiv, OpenReview and CORE. Pre-alpha placeholder; not functional yet.",
+  "keywords": ["mcp", "model-context-protocol", "semantic-scholar", "openalex", "arxiv", "openreview", "literature-search", "cloudflare-workers"],
+  "license": "MIT",
+  "author": "Yang Xingyu (https://github.com/Eryc123Y)",
+  "repository": { "type": "git", "url": "git+https://github.com/Eryc123Y/ibid-mcp.git" },
+  "homepage": "https://github.com/Eryc123Y/ibid-mcp#readme",
+  "bugs": { "url": "https://github.com/Eryc123Y/ibid-mcp/issues" },
+  "files": ["README.md", "LICENSE"]
+}
