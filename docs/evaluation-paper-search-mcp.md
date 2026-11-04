@@ -22,4 +22,11 @@ Question: does [openags/paper-search-mcp](https://github.com/openags/paper-searc
 
 ## What it means for LitScout
 
-Rebuilding a multi-source search engine would duplicate this project. LitScout's plan narrows to what is missing: a hosted remote server for claude.ai and phones, a compact tool set, judgement (reviews, ratings, venue ranks) and `watch`, backed directly by OpenAlex, Semantic Scholar and Crossref. Alternatively, some of this (reviews, venue ranks) could be contributed upstream. Decision for the maintainer.
+Decision (2026-11-04): **LitScout is built as its own product, with paper-search-mcp as the reference to measure against.** Its search coverage is the bar to match (the same 75-paper check, at least 74 found), and what it lacks is what LitScout must do well:
+
+1. **Hosted for you:** one-command deploy to the user's own Cloudflare account, usable from claude.ai and phones.
+2. **Releases that work:** every release installs and starts from the package index, with security fixes released promptly.
+3. **Compact:** a handful of tools, merged answers, small schemas.
+4. **Lawful by default:** no Sci-Hub and no scraping in any default source set.
+5. **Judgement:** OpenReview reviews, ratings and decisions, and venue ranks.
+6. **Watching:** saved topics, authors and venues with "new since", for daily digests.

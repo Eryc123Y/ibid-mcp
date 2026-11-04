@@ -98,6 +98,6 @@ Publisher full text scores low on confidence because the terms decide it: most p
 | # | Decision | Blocking |
 |---|---|---|
 | 1 | ~~Keep "LitScout" or rename~~ Renamed to LitScout on 2026-11-04; reserve `litscout` on npm next | done |
-| 2 | Accept the positioning: hosted, judgement, lawful, compact; not "most sources" | yes, it shapes the README |
+| 2 | ~~Positioning~~ Decided 2026-11-04: build LitScout as its own product, with openags/paper-search-mcp as the reference; match its coverage and do well what it lacks (hosted, working releases, compact, lawful by default, judgement, watching). See [evaluation-paper-search-mcp.md](evaluation-paper-search-mcp.md) | done |
 | 3 | When to build v0.1 | yes |
 | 4 | Keep publisher full text (v0.3) on the plan, gated on terms | no |
