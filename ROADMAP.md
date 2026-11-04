@@ -24,7 +24,7 @@ at 1 request every 3 s.
 
 - **`watch`:** new papers since a date for saved topics, authors or venues, so a daily digest such as [daily-arXiv](https://github.com/Eryc123Y/daily-arXiv-ai-enhanced) can read journals and conferences that are not on arXiv.
 - **Crossref fallback:** DOI-only journal works that Semantic Scholar and OpenAlex miss.
-- **DBLP pack:** a monthly GitHub Action builds compact shards from the CC0 `dblp.xml.gz` dump. `ibid deploy --with-dblp` loads them into the user's R2 bucket. This adds author disambiguation and complete venue tables of contents.
+- **DBLP pack:** a monthly GitHub Action builds compact shards from the CC0 `dblp.xml.gz` dump. `litscout deploy --with-dblp` loads them into the user's R2 bucket. This adds author disambiguation and complete venue tables of contents.
 - **Europe PMC:** full-text search in open-access life-science and chemistry articles, plus preprints.
 - Optional OpenAlex `mailto` opt-in, and per-tool output presets.
 

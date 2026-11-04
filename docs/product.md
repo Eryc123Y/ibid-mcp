@@ -1,4 +1,4 @@
-# Ibid as a product
+# LitScout as a product
 
 Status: draft, 2026-11-04. Product framing for the design in [design.md](design.md) and the plan in [ROADMAP.md](../ROADMAP.md). Market figures are a snapshot taken on 2026-11-04 from GitHub and npm; check them again before launch.
 
@@ -14,7 +14,7 @@ A scholarly-search MCP server that each researcher deploys to their own free Clo
 
 ## Jobs to be done
 
-| Job | Today's workaround | What Ibid does |
+| Job | Today's workaround | What LitScout does |
 |---|---|---|
 | Find the important papers on a topic, including the newest preprints | Web search, then arXiv, then Semantic Scholar, by hand | One `search` across sources, merged and ranked |
 | Judge a paper: venue, venue rank, reviews | Open OpenReview and a ranking list separately | `reviews` and `venue` |
@@ -28,16 +28,16 @@ Measured on 600 random 2024 papers from 15 venues ([daily-arXiv measurement](htt
 
 ## The market (2026-11-04)
 
-| Project | Stars | What it does | Gap Ibid fills |
+| Project | Stars | What it does | Gap LitScout fills |
 |---|---|---|---|
 | [openags/paper-search-mcp](https://github.com/openags/paper-search-mcp) | 2,984 | Python; search and download from 20+ sources (arXiv, PubMed, Semantic Scholar, OpenAlex, Crossref, CORE, dblp, OpenReview, Google Scholar, …); stdio, SSE or HTTP with optional OAuth you set up yourself; optional Sci-Hub fallback | No hosted path for non-developers; Sci-Hub and Google Scholar make it hard to recommend at a university; no venue or review judgement |
 | [blazickjp/arxiv-mcp-server](https://github.com/blazickjp/arxiv-mcp-server) | 3,253 | Local arXiv search and reading (LaTeX sections, BibTeX) | arXiv only; a complement, not a rival |
 | [JackKuo666/Google-Scholar-MCP-Server](https://github.com/JackKuo666/Google-Scholar-MCP-Server) and similar | 430 and less | Google Scholar through scraping | Breaks on bot checks; terms of service |
 | [45645678a/Scholar-mcp](https://github.com/45645678a/Scholar-mcp) | 95 | Local, 9 sources, PDF download including Sci-Hub, AI analysis | Same legal problem; local only |
 | Single-source servers on npm (Semantic Scholar, OpenAlex: at least a dozen) | small | One API each | The agent has to call and merge several |
-| alphaXiv, Hugging Face, Scholar Sidekick connectors | hosted | Reading arXiv papers, trending papers, citation checks | Different jobs; Ibid hands them arXiv IDs and DOIs |
+| alphaXiv, Hugging Face, Scholar Sidekick connectors | hosted | Reading arXiv papers, trending papers, citation checks | Different jobs; LitScout hands them arXiv IDs and DOIs |
 
-**What this means.** "Multi-source paper search over MCP" is not new, and the leader has four times Ibid's planned sources. Ibid should not compete on the number of sources. It wins on:
+**What this means.** "Multi-source paper search over MCP" is not new, and the leader has four times LitScout's planned sources. LitScout should not compete on the number of sources. It wins on:
 
 1. **Hosted for you, by you.** One command to a free Cloudflare account and a pairing code; it works as a remote connector in claude.ai, on phones and in any remote-MCP client, with no TLS, OAuth issuer or always-on machine to run.
 2. **Judgement, not just lists.** Reviews, ratings and decisions from OpenReview and venue ranks next to every result.
@@ -46,23 +46,13 @@ Measured on 600 random 2024 papers from 15 venues ([daily-arXiv measurement](htt
 
 ## Name
 
-"Ibid" is short and academic, and both `ibid` and `ibid-mcp` are free on npm. Against it:
+The project was first called Ibid and was renamed **LitScout** on 2026-11-04 (package `litscout`, repository `litscout-mcp`), before any release. Reasons against the old name:
 
-- It means "the same source as the last citation", the opposite of "many sources".
-- APA and other common styles have dropped it, so many younger researchers do not use it; non-English speakers often do not know it.
-- It is hard to find: 91 GitHub repositories have "ibid" in the name, including a long-lived chat bot `ibid/ibid`, and the word appears in millions of footnotes.
+- "Ibid" means "the same source as the last citation", the opposite of "many sources".
+- APA and other common styles have dropped it, so many younger researchers and non-English speakers do not know it.
+- It is hard to find: 91 GitHub repositories have "ibid" in the name, including a long-lived chat bot, and the word appears in millions of footnotes.
 
-Alternatives checked on 2026-11-04 (npm name free; GitHub repositories whose name contains it):
-
-| Name | npm | GitHub | Reads as |
-|---|---|---|---|
-| **LitScout** | free | 15, all small | "literature scout": says what it does; easy to search and to say in Chinese and English |
-| CiteScout | free | 4 | scouting through citations; may suggest citation formatting |
-| Peerscope | free | 8 | peer review and scope; fits the judgement angle, less the search one |
-| Scholarmesh | free | 7 | several sources joined; descriptive but flat |
-| Ibid | free | 91 | as above |
-
-Recommendation: **LitScout** (package `litscout`, repository `litscout-mcp`), with the Ibid name kept as a footnote in the README if the joke is worth keeping. Renaming now costs one repository rename and one search-and-replace in four documents; after a release it costs users. **The maintainer decides.**
+Names checked on 2026-11-04 (npm name free; GitHub repositories whose name contains it): LitScout (free, 15 small), CiteScout (free, 4; may suggest citation formatting), Peerscope (free, 8; fits judgement more than search), Scholarmesh (free, 7; descriptive but flat). LitScout says what it does and is easy to say in English and Chinese.
 
 ## Success measures
 
@@ -92,7 +82,7 @@ Publisher full text scores low on confidence because the terms decide it: most p
 
 ## Launch
 
-- Before v0.1: reserve the npm name (`npm login`, then publish the placeholder) once the name is settled.
+- Before v0.1: reserve the npm name `litscout` (`npm login`, then publish the placeholder).
 - At v0.1: a 30-second demo GIF (deploy, pair, a query in claude.ai), listings in the official MCP registry, Smithery, Glama and awesome-mcp-servers; one post each on r/MachineLearning and X; a Chinese write-up on Zhihu or Xiaohongshu.
 - Support budget: the maintainer's time is the constraint. Issues are triaged weekly; features beyond the plan wait for v0.3.
 
@@ -107,7 +97,7 @@ Publisher full text scores low on confidence because the terms decide it: most p
 
 | # | Decision | Blocking |
 |---|---|---|
-| 1 | Keep "Ibid" or rename (recommendation: LitScout) | yes, before reserving the npm name |
+| 1 | ~~Keep "LitScout" or rename~~ Renamed to LitScout on 2026-11-04; reserve `litscout` on npm next | done |
 | 2 | Accept the positioning: hosted, judgement, lawful, compact; not "most sources" | yes, it shapes the README |
 | 3 | When to build v0.1 | yes |
 | 4 | Keep publisher full text (v0.3) on the plan, gated on terms | no |

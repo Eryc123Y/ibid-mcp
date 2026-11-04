@@ -1,6 +1,6 @@
 # Contributing
 
-Ibid is pre-alpha. Issues and design feedback are welcome now; please open an
+LitScout is pre-alpha. Issues and design feedback are welcome now; please open an
 issue before starting a large pull request.
 
 ## Ground rules
