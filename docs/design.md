@@ -1,4 +1,4 @@
-# Ibid design
+# LitScout design
 
 Status: draft for v0.1. Decisions may still change during implementation.
 
@@ -22,10 +22,10 @@ Cloudflare Worker (one per user)
 
 | Step | What happens |
 |---|---|
-| `ibid deploy` | The CLI generates a random management token. It stores the token locally (file mode 0600) and uploads it as the Worker secret `MGMT_TOKEN`. |
-| `ibid pair` | The CLI sends `POST /admin/pair` with `Authorization: Bearer <MGMT_TOKEN>`. The Worker creates an 8-character code from an alphabet without look-alike characters, and stores only a hash of it. The code expires after **10 minutes** and allows at most **5 attempts**. The CLI prints the connector URL and the code. |
+| `litscout deploy` | The CLI generates a random management token. It stores the token locally (file mode 0600) and uploads it as the Worker secret `MGMT_TOKEN`. |
+| `litscout pair` | The CLI sends `POST /admin/pair` with `Authorization: Bearer <MGMT_TOKEN>`. The Worker creates an 8-character code from an alphabet without look-alike characters, and stores only a hash of it. The code expires after **10 minutes** and allows at most **5 attempts**. The CLI prints the connector URL and the code. |
 | Adding the connector | The client runs standard MCP OAuth. The `/authorize` page asks for the pairing code. A correct code approves this client and closes the pairing window. |
-| `ibid clients` / `ibid revoke` | `GET /admin/clients` lists clients and `POST /admin/revoke` revokes them. |
+| `litscout clients` / `litscout revoke` | `GET /admin/clients` lists clients and `POST /admin/revoke` revokes them. |
 
 Security notes:
 - **Keep pairing state in a Durable Object, not KV.** KV is eventually consistent, so parallel guesses could get past the attempt counter.
@@ -36,7 +36,7 @@ Security notes:
 
 | Command | Purpose |
 |---|---|
-| `deploy` | Check the user is logged in (`wrangler whoami`; run `wrangler login` if not). Create the KV namespace. Write a generated `wrangler.jsonc` into `~/.config/ibid/`. Prompt for keys. Upload secrets with `wrangler secret bulk` from a temporary file with mode 0600, so keys never appear on the command line. Deploy the Worker bundle that ships in the npm package. |
+| `deploy` | Check the user is logged in (`wrangler whoami`; run `wrangler login` if not). Create the KV namespace. Write a generated `wrangler.jsonc` into `~/.config/litscout/`. Prompt for keys. Upload secrets with `wrangler secret bulk` from a temporary file with mode 0600, so keys never appear on the command line. Deploy the Worker bundle that ships in the npm package. |
 | `pair` | Print the connector URL and a pairing code. |
 | `clients`, `revoke [id]` | Manage authorised clients. |
 | `status` | Show the endpoint, the configured sources, and the remaining OpenAlex quota. |
@@ -59,8 +59,8 @@ Notes from live checks in October 2026.
 | Europe PMC | Full-text search in OA life-science and chemistry articles, plus preprints | None | Polite use | v0.2 |
 
 Not included:
-- **DBLP's live API:** it sits behind a bot challenge, and Ibid does not bypass it.
-- **alphaXiv:** it has no public API. Ibid returns arXiv IDs and links instead.
+- **DBLP's live API:** it sits behind a bot challenge, and LitScout does not bypass it.
+- **alphaXiv:** it has no public API. LitScout returns arXiv IDs and links instead.
 - **Crossref, Unpaywall:** covered by citation-focused servers.
 - **Google Scholar:** has no API.
 
@@ -89,6 +89,6 @@ partial results are always marked as such.
 
 ## 7. Privacy
 
-- Ibid sends no contact email upstream by default. The OpenAlex `mailto` is opt-in.
+- LitScout sends no contact email upstream by default. The OpenAlex `mailto` is opt-in.
 - Keys are stored only as Worker secrets in the user's own account.
 - The server keeps no query logs beyond Cloudflare's default request metrics.

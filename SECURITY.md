@@ -1,6 +1,6 @@
 # Security policy
 
-Ibid runs in each user's own Cloudflare account and holds their API keys, so
+LitScout runs in each user's own Cloudflare account and holds their API keys, so
 security reports are taken seriously.
 
 **Report vulnerabilities privately** through GitHub's "Report a vulnerability"

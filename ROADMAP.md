@@ -15,12 +15,19 @@ The work is test-driven, with a target of at least 80% coverage.
 | P3d | CORE adapter (open-access links and snippets) | 1 day |
 | P3e | Venue ranking table and the `venue` tool, after checking that the data may be redistributed | 0.5–1 day |
 | P4 | README quickstart, CI, a test deploy on a clean Cloudflare account, and publishing to npm | 1 day |
+| P5 | Coverage eval in CI: 600 random 2024 papers from 15 venues (from [daily-arXiv's arXiv coverage measurement](https://github.com/Eryc123Y/daily-arXiv-ai-enhanced/blob/main/docs/measurements/arxiv-coverage.md)); `search` must find 90% by title, against about 35% that are on arXiv | 0.5 day |
 
 Still open: whether to support Semantic Scholar without a key. It would be slow,
 at 1 request every 3 s.
 
 ## v0.2: backlog
 
-- **DBLP pack:** a monthly GitHub Action builds compact shards from the CC0 `dblp.xml.gz` dump. `ibid deploy --with-dblp` loads them into the user's R2 bucket. This adds author disambiguation and complete venue tables of contents.
+- **`watch`:** new papers since a date for saved topics, authors or venues, so a daily digest such as [daily-arXiv](https://github.com/Eryc123Y/daily-arXiv-ai-enhanced) can read journals and conferences that are not on arXiv.
+- **Crossref fallback:** DOI-only journal works that Semantic Scholar and OpenAlex miss.
+- **DBLP pack:** a monthly GitHub Action builds compact shards from the CC0 `dblp.xml.gz` dump. `litscout deploy --with-dblp` loads them into the user's R2 bucket. This adds author disambiguation and complete venue tables of contents.
 - **Europe PMC:** full-text search in open-access life-science and chemistry articles, plus preprints.
 - Optional OpenAlex `mailto` opt-in, and per-tool output presets.
+
+## v0.3: idea, gated on terms
+
+- **Publisher full text with the user's own entitlements:** Elsevier (ScienceDirect, Scopus), IEEE Xplore and Springer Nature APIs, with keys and institutional access the user already has. Only after each provider's text-and-data-mining terms are read and allow it; text goes to the agent and is never stored. Why: on 2026-11-04 only 8-50% of papers in IEEE, Elsevier and ACM graphics journals were on arXiv. See [docs/product.md](docs/product.md).
