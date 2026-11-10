@@ -28,16 +28,29 @@ const S2_CANDIDATES = 8;
 const OA_CANDIDATES = 6;
 const OA_WORKS_FOR_EVIDENCE = 100;
 
-async function explicitRecords(ctx: ToolContext, queries: readonly AuthorQuery[]): Promise<Map<number, AuthorRecord>> {
+async function explicitRecords(
+  ctx: ToolContext,
+  queries: readonly AuthorQuery[],
+): Promise<Map<number, AuthorRecord>> {
   const parsed = queries.map((q) => parseAuthorId(q.input));
   const s2Ids = parsed.flatMap((p) => (p.kind === "s2" ? [p.value] : []));
   const oaIds = parsed.flatMap((p) => (p.kind === "openalex" ? [p.value] : []));
   const orcids = parsed.flatMap((p) => (p.kind === "orcid" ? [p.value] : []));
 
   const [s2, oa, byOrcid] = await Promise.all([
-    s2Ids.length > 0 ? withFallback(ctx, () => ctx.s2.authorBatch(s2Ids, true), async () => []) : [],
-    oaIds.length > 0 ? optional(() => ctx.oa.authorsByIds("ids.openalex", oaIds), []) : [],
-    orcids.length > 0 ? optional(() => ctx.oa.authorsByIds("orcid", orcids), []) : [],
+    s2Ids.length > 0
+      ? withFallback(
+          ctx,
+          () => ctx.s2.authorBatch(s2Ids, true),
+          async () => [],
+        )
+      : [],
+    oaIds.length > 0
+      ? optional(() => ctx.oa.authorsByIds("ids.openalex", oaIds), [])
+      : [],
+    orcids.length > 0
+      ? optional(() => ctx.oa.authorsByIds("orcid", orcids), [])
+      : [],
   ]);
   const out = new Map<number, AuthorRecord>();
   parsed.forEach((p, i) => {
@@ -55,7 +68,10 @@ async function explicitRecords(ctx: ToolContext, queries: readonly AuthorQuery[]
 }
 
 /** Attach each OpenAlex work to the candidates that authored it. */
-export function attributeWorks(records: readonly AuthorRecord[], works: readonly Paper[]): AuthorRecord[] {
+export function attributeWorks(
+  records: readonly AuthorRecord[],
+  works: readonly Paper[],
+): AuthorRecord[] {
   return records.map((r) => {
     if (r.source !== "openalex") return r;
     const mine = works.filter((w) => w.authors.some((a) => a.id === r.id));
@@ -73,39 +89,88 @@ function dedupeRecords(records: readonly AuthorRecord[]): AuthorRecord[] {
   return Array.from(seen.values());
 }
 
-export async function resolveAuthors(ctx: ToolContext, queries: readonly AuthorQuery[]): Promise<ResolvedAuthor[]> {
+export async function resolveAuthors(
+  ctx: ToolContext,
+  queries: readonly AuthorQuery[],
+): Promise<ResolvedAuthor[]> {
   const explicit = await explicitRecords(ctx, queries);
   const names = queries.map((q, i) => explicit.get(i)?.name ?? q.input.trim());
-  const missing = queries.flatMap((q, i) => (parseAuthorId(q.input).kind !== "name" && !explicit.has(i) ? [q.input] : []));
-  if (missing.length > 0) ctx.notices.push({ level: "warn", text: `Author id(s) not found: ${missing.join(", ")}` });
+  const missing = queries.flatMap((q, i) =>
+    parseAuthorId(q.input).kind !== "name" && !explicit.has(i) ? [q.input] : [],
+  );
+  if (missing.length > 0)
+    ctx.notices.push({
+      level: "warn",
+      text: `Author id(s) not found: ${missing.join(", ")}`,
+    });
 
   const perQuery = await Promise.all(
     names.map(async (name) => {
       const [s2, oa] = await Promise.all([
-        withFallback(ctx, () => ctx.s2.searchAuthors(name, S2_CANDIDATES, true), async () => []),
+        withFallback(
+          ctx,
+          () => ctx.s2.searchAuthors(name, S2_CANDIDATES, true),
+          async () => [],
+        ),
         optional(() => ctx.oa.searchAuthors(name, OA_CANDIDATES), []),
       ]);
-      return [...s2, ...oa.filter((r) => namesCompatible(name, r.name) || r.aliases.some((a) => namesCompatible(name, a)))];
+      return [
+        ...s2,
+        ...oa.filter(
+          (r) =>
+            namesCompatible(name, r.name) ||
+            r.aliases.some((a) => namesCompatible(name, a)),
+        ),
+      ];
     }),
   );
 
   const oaIds = Array.from(
-    new Set(perQuery.flat().concat(Array.from(explicit.values())).filter((r) => r.source === "openalex").map((r) => r.id)),
+    new Set(
+      perQuery
+        .flat()
+        .concat(Array.from(explicit.values()))
+        .filter((r) => r.source === "openalex")
+        .map((r) => r.id),
+    ),
   ).slice(0, OR_BATCH_MAX);
-  const evidence = oaIds.length > 0 ? (await optional(() => ctx.oa.worksByAuthors(oaIds, OA_WORKS_FOR_EVIDENCE, "recent"), {papers:[],count:0})).papers : [];
+  const evidence =
+    oaIds.length > 0
+      ? (
+          await optional(
+            () => ctx.oa.worksByAuthors(oaIds, OA_WORKS_FOR_EVIDENCE, "recent"),
+            { papers: [], count: 0 },
+          )
+        ).papers
+      : [];
 
   return queries.map((query, i) => {
     const pinned = explicit.get(i);
-    const pool = dedupeRecords(attributeWorks([...(pinned ? [pinned] : []), ...(perQuery[i] ?? [])], evidence));
+    const pool = dedupeRecords(
+      attributeWorks(
+        [...(pinned ? [pinned] : []), ...(perQuery[i] ?? [])],
+        evidence,
+      ),
+    );
     const name = names[i] ?? query.input;
-    const clusters = mergeAuthors(pool, { queryName: name, affiliationHint: query.affiliationHint });
+    const clusters = mergeAuthors(pool, {
+      queryName: name,
+      affiliationHint: query.affiliationHint,
+    });
     const primary = pinned
-      ? clusters.find((c) => c.records.some((r) => recordKey(r) === recordKey(pinned)))
+      ? clusters.find((c) =>
+          c.records.some((r) => recordKey(r) === recordKey(pinned)),
+        )
       : clusters[0];
     return { query, name, clusters, primary };
   });
 }
 
-export function idsOf(cluster: AuthorCluster | undefined, source: "s2" | "openalex"): string[] {
-  return (cluster?.records ?? []).filter((r) => r.source === source).map((r) => r.id);
+export function idsOf(
+  cluster: AuthorCluster | undefined,
+  source: "s2" | "openalex",
+): string[] {
+  return (cluster?.records ?? [])
+    .filter((r) => r.source === source)
+    .map((r) => r.id);
 }

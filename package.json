@@ -37,7 +37,10 @@
     "test:live": "vitest run --config vitest.live.config.ts",
     "build": "node scripts/build.mjs",
     "prepack": "npm run build",
-    "test:eval": "node scripts/eval.mjs"
+    "test:eval": "node scripts/eval.mjs",
+    "test:worker": "npm run build && node scripts/worker-smoke.mjs",
+    "format": "prettier --write \"{src,cli,eval,test}/**/*.{ts,json}\" \"scripts/*.mjs\" \"*.{ts,js,json,jsonc}\"",
+    "format:check": "prettier --check \"{src,cli,eval,test}/**/*.{ts,json}\" \"scripts/*.mjs\" \"*.{ts,js,json,jsonc}\""
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "1.2.3",
@@ -51,11 +54,13 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "latest",
+    "@cloudflare/workers-types": "5.20261110.1",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "5.0.3",
     "esbuild": "^0.28.0",
     "eslint": "^9.39.0",
+    "miniflare": "5.20261012.0-beta",
+    "prettier": "^3.9.10",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.46.0",
     "vitest": "5.0.3"
@@ -64,6 +69,6 @@
     "litscout": "dist/cli/index.js"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13.0"
   }
 }

@@ -1,7 +1,47 @@
-{"notes":[
-{"id":"syntheticForum","forum":"syntheticForum","content":{"title":{"value":"A synthetic reviewed paper"},"venue":{"value":"Synthetic Conference 2024"},"arxiv_id":{"value":"2401.00001"}}},
-{"id":"review1","forum":"syntheticForum","invitations":["Synthetic/2024/Paper1/-/Official_Review"],"content":{"rating":{"value":"8: accept"},"summary":{"value":"Clear evidence. More details follow."},"weaknesses":{"value":"Limited baseline comparison."}}},
-{"id":"review2","forum":"syntheticForum","invitations":["Synthetic/2024/Paper1/-/Official_Review"],"content":{"rating":{"value":6},"summary":{"value":"Useful result. Some caveats."}}},
-{"id":"meta","forum":"syntheticForum","invitations":["Synthetic/2024/Paper1/-/Meta_Review"],"content":{"rating":{"value":10},"summary":{"value":"Do not count meta review as a reviewer rating."}}},
-{"id":"decision","forum":"syntheticForum","invitations":["Synthetic/2024/Paper1/-/Decision"],"content":{"decision":{"value":"Accept"}}}
-]}
+{
+  "notes": [
+    {
+      "id": "syntheticForum",
+      "forum": "syntheticForum",
+      "content": {
+        "title": { "value": "A synthetic reviewed paper" },
+        "venue": { "value": "Synthetic Conference 2024" },
+        "arxiv_id": { "value": "2401.00001" }
+      }
+    },
+    {
+      "id": "review1",
+      "forum": "syntheticForum",
+      "invitations": ["Synthetic/2024/Paper1/-/Official_Review"],
+      "content": {
+        "rating": { "value": "8: accept" },
+        "summary": { "value": "Clear evidence. More details follow." },
+        "weaknesses": { "value": "Limited baseline comparison." }
+      }
+    },
+    {
+      "id": "review2",
+      "forum": "syntheticForum",
+      "invitations": ["Synthetic/2024/Paper1/-/Official_Review"],
+      "content": {
+        "rating": { "value": 6 },
+        "summary": { "value": "Useful result. Some caveats." }
+      }
+    },
+    {
+      "id": "meta",
+      "forum": "syntheticForum",
+      "invitations": ["Synthetic/2024/Paper1/-/Meta_Review"],
+      "content": {
+        "rating": { "value": 10 },
+        "summary": { "value": "Do not count meta review as a reviewer rating." }
+      }
+    },
+    {
+      "id": "decision",
+      "forum": "syntheticForum",
+      "invitations": ["Synthetic/2024/Paper1/-/Decision"],
+      "content": { "decision": { "value": "Accept" } }
+    }
+  ]
+}

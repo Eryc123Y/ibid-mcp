@@ -14,6 +14,7 @@ export interface Paper {
   readonly id: string;
   readonly title: string;
   readonly year?: number;
+  readonly published?: string;
   readonly venue?: string;
   readonly authors: readonly AuthorRef[];
   readonly citationCount?: number;

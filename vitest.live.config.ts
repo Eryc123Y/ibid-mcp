@@ -5,8 +5,15 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
-      "cloudflare:workers": fileURLToPath(new URL("./test/stubs/cloudflare-workers.ts", import.meta.url)),
+      "cloudflare:workers": fileURLToPath(
+        new URL("./test/stubs/cloudflare-workers.ts", import.meta.url),
+      ),
     },
   },
-  test: { include: ["test/live/**/*.live.ts"], environment: "node", testTimeout: 120_000, silent: false },
+  test: {
+    include: ["test/live/**/*.live.ts"],
+    environment: "node",
+    testTimeout: 120_000,
+    silent: false,
+  },
 });

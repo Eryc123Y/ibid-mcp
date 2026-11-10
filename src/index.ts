@@ -14,9 +14,17 @@ const MCP_ROUTE = "/mcp";
 
 const mcpApiHandler: { fetch: ExportedHandlerFetchHandler<AppEnv> } = {
   async fetch(request, env, ctx) {
-    const authorizationId = (ctx as ExecutionContext & { props?: { authorizationId?: string } }).props?.authorizationId;
-    if (!authorizationId || !(await pairingStore(env).isActive(authorizationId))) return new Response("Forbidden", { status: 403 });
-    const handler = createMcpHandler(() => buildServer(env), { route: MCP_ROUTE });
+    const authorizationId = (
+      ctx as ExecutionContext & { props?: { authorizationId?: string } }
+    ).props?.authorizationId;
+    if (
+      !authorizationId ||
+      !(await pairingStore(env).isActive(authorizationId))
+    )
+      return new Response("Forbidden", { status: 403 });
+    const handler = createMcpHandler(() => buildServer(env), {
+      route: MCP_ROUTE,
+    });
     return handler(request as Request, env, ctx);
   },
 };

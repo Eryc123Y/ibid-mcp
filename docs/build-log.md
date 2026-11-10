@@ -59,3 +59,12 @@
 - Four evaluation-harness tests pass, including replay of 600 explicitly synthetic unit-test cases. This is not the requested empirical acceptance result.
 - Blocker: the referenced checkout contains the measurement report and sampling scripts but not the original 600-paper output or recorded title-search responses. Asked for an existing snapshot location. `npm run test:eval` exits 2 and writes `status: unverified`; it does not invent a passing dataset. No live tests or collection ran.
 - The original measurement uses ICCV 2023, unlike the roadmap's shorthand “2024 papers”; the validator preserves this explicit original-method exception.
+
+## CI and README
+
+- Added Node 22/24 CI for strict typechecking, ESLint, formatting, 80%-minimum coverage, local Worker execution, package inspection and offline evaluation reporting. Real title-coverage regressions fail CI; an absent snapshot is visibly unverified, and the explicit manual acceptance run fails when it is absent.
+- Replaced the placeholder README with source-build setup, key handling, commands, all seven tools, licence findings and precise verification limits. Added consistent formatting; implementation files remain under 400 lines.
+- Added real MCP transport calls for all seven tools and an OAuth registration/PKCE/pairing/token/revocation round trip. Fixed the additional three-to-six-author requirement, malformed-JSON caching, transitive deduplication, final-attempt rate-limit penalties, recent sorting/year filtering, Wrangler executable resolution and deployment URL parsing, each after a failing regression.
+- Validation: 154 tests passed; statements 93.56%, branches 83.25%, functions 95.37%, lines 94.59%. Strict typecheck, lint, format check, build and local workerd smoke passed. The smoke blocks all outbound network requests.
+- Package dry-run contained only seven expected runtime/documentation files (approximately 331 KB packed); no fixtures, credentials, generated account configuration or real ranking table. Official venue documents used for local inspection were removed after the check.
+- CI was configured but not run on GitHub. No login, deployment, publishing, push or live upstream test occurred.

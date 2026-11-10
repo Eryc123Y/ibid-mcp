@@ -31,10 +31,18 @@ export async function requestJson<T>(req: JsonRequest): Promise<T> {
     const response = await fetchWithRetry(req.url, req.init, req.retry);
     await req.onResponse?.(response);
     const body = await response.text();
-    if (!response.ok) throw new HttpError(response.status, req.service, "request failed");
+    if (!response.ok)
+      throw new HttpError(response.status, req.service, "request failed");
+    try {
+      JSON.parse(body);
+    } catch {
+      throw new HttpError(502, req.service, "invalid JSON");
+    }
     return { body, cacheable: true };
   };
-  const body = req.cacheKey ? await cached(req.cacheKey, req.ttlSeconds ?? 600, load) : (await load()).body;
+  const body = req.cacheKey
+    ? await cached(req.cacheKey, req.ttlSeconds ?? 600, load)
+    : (await load()).body;
   try {
     return JSON.parse(body) as T;
   } catch {

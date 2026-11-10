@@ -24,9 +24,14 @@ export function nameParts(name: string): NameParts {
   const ordered = commaForm
     ? `${name.slice(name.indexOf(",") + 1)} ${name.slice(0, name.indexOf(","))}`
     : name;
-  const tokens = foldText(ordered.replace(/[.\-]/g, " ")).split(" ").filter(Boolean);
+  const tokens = foldText(ordered.replace(/[.\-]/g, " "))
+    .split(" ")
+    .filter(Boolean);
   if (tokens.length === 0) return { surname: "", given: [] };
-  return { surname: tokens[tokens.length - 1] ?? "", given: tokens.slice(0, -1) };
+  return {
+    surname: tokens[tokens.length - 1] ?? "",
+    given: tokens.slice(0, -1),
+  };
 }
 
 /**
@@ -60,29 +65,52 @@ export function nameKey(name: string): string {
   return `${p.given[0]?.[0] ?? ""} ${p.surname}`.trim();
 }
 
-/** Title key for dedupe: folded, without spaces, first 120 chars. */
+/** Title key for dedupe: folded, without spaces. */
 export function titleKey(title: string): string {
-  return foldText(title).replace(/\s/g, "").slice(0, 120);
+  return foldText(title).replace(/\s/g, "");
 }
 
-export function normalizeDoi(doi: string | undefined | null): string | undefined {
+export function normalizeDoi(
+  doi: string | undefined | null,
+): string | undefined {
   if (!doi) return undefined;
-  const cleaned = doi.trim().replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, "").replace(/^doi:/i, "").toLowerCase();
+  const cleaned = doi
+    .trim()
+    .replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, "")
+    .replace(/^doi:/i, "")
+    .toLowerCase();
   return cleaned.startsWith("10.") ? cleaned : undefined;
 }
 
 /** All dedupe keys for a paper: its DOI, its arXiv id and its title. */
-export function paperKeys(paper: Pick<Paper, "doi" | "arxiv" | "title" | "year">): string[] {
+export function paperKeys(
+  paper: Pick<Paper, "doi" | "arxiv" | "title" | "year">,
+): string[] {
   const keys: string[] = [];
   const doi = normalizeDoi(paper.doi);
   if (doi) keys.push(`doi:${doi}`);
-  if (paper.arxiv) keys.push(`arxiv:${paper.arxiv.toLowerCase().replace(/v\d+$/, "")}`);
+  if (paper.arxiv)
+    keys.push(`arxiv:${paper.arxiv.toLowerCase().replace(/v\d+$/, "")}`);
   const t = titleKey(paper.title);
   if (t.length >= 12) keys.push(`title:${t}:${paper.year ?? "unknown"}`);
   return keys;
 }
 
-const STOP = new Set(["of", "the", "and", "for", "de", "at", "in", "university", "univ", "institute", "school", "dept", "department"]);
+const STOP = new Set([
+  "of",
+  "the",
+  "and",
+  "for",
+  "de",
+  "at",
+  "in",
+  "university",
+  "univ",
+  "institute",
+  "school",
+  "dept",
+  "department",
+]);
 
 /** Content tokens of an affiliation string, for overlap scoring. */
 export function affiliationTokens(text: string): Set<string> {

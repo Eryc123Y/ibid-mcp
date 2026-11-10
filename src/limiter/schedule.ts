@@ -41,10 +41,17 @@ export function reserve(
   if (waitMs > maxWaitMs) {
     return { state, result: { ok: false, retryAfterMs: waitMs } };
   }
-  return { state: { nextFreeAt: slot + intervalMs }, result: { ok: true, waitMs } };
+  return {
+    state: { nextFreeAt: slot + intervalMs },
+    result: { ok: true, waitMs },
+  };
 }
 
 /** Push the queue back after S2 answered 429, e.g. by its Retry-After. */
-export function penalize(state: LimiterState, now: number, delayMs: number): LimiterState {
+export function penalize(
+  state: LimiterState,
+  now: number,
+  delayMs: number,
+): LimiterState {
   return { nextFreeAt: Math.max(state.nextFreeAt, now + Math.max(0, delayMs)) };
 }

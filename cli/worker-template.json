@@ -2,9 +2,7 @@
   "name": "litscout",
   "main": "WORKER_BUNDLE_PATH",
   "compatibility_date": "2026-10-01",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "vars": {
     "PUBLIC_URL": "https://YOUR_WORKER_HOST"
   },
@@ -29,10 +27,8 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": [
-        "SourceLimiter",
-        "PairingStore"
-      ]
+      "new_sqlite_classes": ["SourceLimiter", "PairingStore"]
     }
-  ]
+  ],
+  "send_metrics": false
 }

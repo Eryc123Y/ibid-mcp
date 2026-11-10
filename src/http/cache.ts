@@ -14,8 +14,13 @@ const memory = new Map<string, Entry>();
 const CACHE_NAME = "scholar-mcp-v1";
 
 async function sha256Hex(text: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text),
+  );
+  return Array.from(new Uint8Array(digest), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
 }
 
 function memoryGet(key: string, now: number): string | undefined {
@@ -30,7 +35,12 @@ function memoryGet(key: string, now: number): string | undefined {
   return hit.body;
 }
 
-function memorySet(key: string, body: string, ttlSeconds: number, now: number): void {
+function memorySet(
+  key: string,
+  body: string,
+  ttlSeconds: number,
+  now: number,
+): void {
   memory.set(key, { body, expires: now + ttlSeconds * 1000 });
   while (memory.size > MAX_ENTRIES) {
     const oldest = memory.keys().next().value;
@@ -41,7 +51,9 @@ function memorySet(key: string, body: string, ttlSeconds: number, now: number): 
 
 async function openCache(): Promise<Cache | undefined> {
   try {
-    return typeof caches === "undefined" ? undefined : await caches.open(CACHE_NAME);
+    return typeof caches === "undefined"
+      ? undefined
+      : await caches.open(CACHE_NAME);
   } catch {
     return undefined;
   }
@@ -71,7 +83,9 @@ export async function cached(
   const { body, cacheable } = await load();
   if (cacheable) {
     memorySet(key, body, ttlSeconds, now);
-    const response = new Response(body, { headers: { "cache-control": `max-age=${ttlSeconds}` } });
+    const response = new Response(body, {
+      headers: { "cache-control": `max-age=${ttlSeconds}` },
+    });
     await cache?.put(cacheKey, response).catch(() => undefined);
   }
   return body;

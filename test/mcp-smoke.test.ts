@@ -24,10 +24,16 @@ async function rpc(body: unknown): Promise<unknown> {
       body: JSON.stringify(body),
     }),
     env,
-    { waitUntil: () => {}, passThroughOnException: () => {}, props: {} } as unknown as ExecutionContext,
+    {
+      waitUntil: () => {},
+      passThroughOnException: () => {},
+      props: {},
+    } as unknown as ExecutionContext,
   );
   const text = await res.text();
-  const data = text.startsWith("{") ? text : (text.split("\n").find((l) => l.startsWith("data:")) ?? "").slice(5);
+  const data = text.startsWith("{")
+    ? text
+    : (text.split("\n").find((l) => l.startsWith("data:")) ?? "").slice(5);
   return JSON.parse(data);
 }
 
@@ -37,7 +43,11 @@ describe("MCP protocol smoke", () => {
       jsonrpc: "2.0",
       id: 1,
       method: "initialize",
-      params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "smoke", version: "1" } },
+      params: {
+        protocolVersion: "2025-06-18",
+        capabilities: {},
+        clientInfo: { name: "smoke", version: "1" },
+      },
     })) as { result: { serverInfo: { name: string }; instructions: string } };
     expect(res.result.serverInfo.name).toBe("litscout");
     expect(res.result.instructions).toMatch(/1 request every 3 seconds/);
@@ -45,13 +55,35 @@ describe("MCP protocol smoke", () => {
   });
 
   it("tools/list exposes exactly the seven tools", async () => {
-    const res = (await rpc({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} })) as {
-      result: { tools: Array<{ name: string; description: string; inputSchema: { properties: Record<string, unknown> } }> };
+    const res = (await rpc({
+      jsonrpc: "2.0",
+      id: 2,
+      method: "tools/list",
+      params: {},
+    })) as {
+      result: {
+        tools: Array<{
+          name: string;
+          description: string;
+          inputSchema: { properties: Record<string, unknown> };
+        }>;
+      };
     };
     const names = res.result.tools.map((t) => t.name).sort();
-    expect(names).toEqual(["coauthorship", "get_author", "get_paper", "paper_links", "reviews", "search", "venue"]);
+    expect(names).toEqual([
+      "coauthorship",
+      "get_author",
+      "get_paper",
+      "paper_links",
+      "reviews",
+      "search",
+      "venue",
+    ]);
     const getPaper = res.result.tools.find((t) => t.name === "get_paper");
     expect(getPaper?.description).toMatch(/ONE call/);
-    expect(Object.keys(getPaper?.inputSchema.properties ?? {})).toEqual(["ids", "full"]);
+    expect(Object.keys(getPaper?.inputSchema.properties ?? {})).toEqual([
+      "ids",
+      "full",
+    ]);
   });
 });

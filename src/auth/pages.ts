@@ -2,7 +2,8 @@
 
 import type { ConsentDescription } from "@cloudflare/workers-oauth-provider";
 
-export const escapeHtml = (value: string): string => value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+export const escapeHtml = (value: string): string =>
+  value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 const STYLE =
   "body{font:16px/1.5 system-ui,sans-serif;max-width:34rem;margin:3rem auto;padding:0 16px;color:#1d1d1f;background:#fff}" +
@@ -15,7 +16,10 @@ function page(title: string, body: string): string {
   return `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><style>${STYLE}</style><body>${body}</body></html>`;
 }
 
-export function consentPage(details: ConsentDescription, handle: string): string {
+export function consentPage(
+  details: ConsentDescription,
+  handle: string,
+): string {
   const name = escapeHtml(details.clientName);
   const origin = details.clientDomain
     ? `Published by <strong>${escapeHtml(details.clientDomain)}</strong>.`
@@ -37,9 +41,20 @@ ${loopback}
   );
 }
 
-export function messagePage(title: string, message: string, status: number): Response {
-  return new Response(page(title, `<h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p>`), {
-    status,
-    headers: { "content-type": "text/html; charset=utf-8", "x-frame-options": "DENY", "cache-control": "no-store" },
-  });
+export function messagePage(
+  title: string,
+  message: string,
+  status: number,
+): Response {
+  return new Response(
+    page(title, `<h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p>`),
+    {
+      status,
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "x-frame-options": "DENY",
+        "cache-control": "no-store",
+      },
+    },
+  );
 }

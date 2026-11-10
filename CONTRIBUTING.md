@@ -1,22 +1,27 @@
 # Contributing
 
-LitScout is pre-alpha. Issues and design feedback are welcome now; please open an
-issue before starting a large pull request.
+Read [the design](docs/design.md), [product scope](docs/product.md) and
+[build brief](docs/v0.1-build-brief.md) before changing behavior.
 
-## Ground rules
+- Write a failing test before implementing a change.
+- Unit tests must not call upstream networks. Keep live checks in the separate opt-in configuration.
+- Never commit keys, contact addresses or account configuration. The CLI generates its configuration locally.
+- Every source needs bounded retries, a source limiter, explicit failure reporting and fixture tests.
+- Do not bypass bot checks or add unofficial paper scraping. Venue data must follow the documented licence decision.
+- Keep the tool surface small. Explain why an existing tool cannot support a proposed addition.
 
-- **Respect upstream terms.** Never add code that bypasses bot checks or CAPTCHAs, or that scrapes sites that have no API.
-- **No shared keys.** Tests and examples must never contain API keys. Live tests read keys from environment variables and are opt-in.
-- **Keep the tool surface small.** Before adding a new tool, show that extending an existing tool won't do.
-- **Every new source** needs a rate limiter entry, a terms-of-use note in `docs/design.md`, and tests that cover the case where the source is skipped.
-
-## Development (once the code lands)
-
-```bash
-npm install
+```sh
+npm ci --ignore-scripts
+npm test
+npm run test:coverage
 npm run typecheck
-npm test            # unit tests, no network access
-npm run test:live   # opt-in; needs your own keys in the environment
+npm run lint
+npm run build
 ```
 
-Commit messages follow `<type>: <description>`, where type is one of `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf` or `ci`.
+The coverage threshold is 80% for statements, branches, functions and lines.
+Empirical title-search coverage is a separate recorded-snapshot gate described in
+[eval/README.md](eval/README.md).
+
+Use conventional commits such as `feat: ...`, `fix: ...`, `test: ...` and
+`docs: ...`. Publishing and account operations require explicit maintainer action.

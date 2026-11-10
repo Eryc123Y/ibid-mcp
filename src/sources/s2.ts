@@ -9,10 +9,21 @@ import { HttpError, requestJson } from "../http/json";
 const BASE = "https://api.semanticscholar.org/graph/v1";
 const TTL_SECONDS = 600;
 
-const PAPER_FIELDS = "corpusId,externalIds,title,year,venue,authors,citationCount,openAccessPdf";
-const LINK_FIELDS = "corpusId,externalIds,title,year,venue,authors,citationCount";
-const AUTHOR_FIELDS = "name,affiliations,paperCount,citationCount,hIndex,externalIds";
-const AUTHOR_PAPER_FIELDS = ["corpusId", "externalIds", "title", "year", "venue", "authors", "citationCount"]
+const PAPER_FIELDS =
+  "corpusId,externalIds,title,year,venue,authors,citationCount,openAccessPdf";
+const LINK_FIELDS =
+  "corpusId,externalIds,title,year,venue,authors,citationCount";
+const AUTHOR_FIELDS =
+  "name,affiliations,paperCount,citationCount,hIndex,externalIds";
+const AUTHOR_PAPER_FIELDS = [
+  "corpusId",
+  "externalIds",
+  "title",
+  "year",
+  "venue",
+  "authors",
+  "citationCount",
+]
   .map((f) => `papers.${f}`)
   .join(",");
 
@@ -22,8 +33,8 @@ export interface S2Deps {
   readonly acquire: () => Promise<void>;
   readonly penalize: (delayMs: number) => Promise<void>;
   readonly fetchImpl?: typeof fetch;
-  readonly sleep?: (ms:number)=>Promise<void>;
-  readonly onResponse?: (response:Response) => Promise<void>;
+  readonly sleep?: (ms: number) => Promise<void>;
+  readonly onResponse?: (response: Response) => Promise<void>;
 }
 
 interface RawAuthor {
@@ -46,7 +57,10 @@ export interface RawPaper {
   readonly abstract?: string | null;
   readonly year?: number | null;
   readonly venue?: string | null;
-  readonly authors?: Array<{ authorId?: string | null; name?: string | null }> | null;
+  readonly authors?: Array<{
+    authorId?: string | null;
+    name?: string | null;
+  }> | null;
   readonly citationCount?: number | null;
   readonly openAccessPdf?: { url?: string | null } | null;
 }
@@ -55,7 +69,9 @@ export function mapS2Paper(raw: RawPaper): Paper {
   const ext = raw.externalIds ?? {};
   const doi = typeof ext.DOI === "string" ? ext.DOI.toLowerCase() : undefined;
   const arxiv = typeof ext.ArXiv === "string" ? ext.ArXiv : undefined;
-  const id = raw.corpusId ? `CorpusId:${raw.corpusId}` : (raw.paperId ?? "unknown");
+  const id = raw.corpusId
+    ? `CorpusId:${raw.corpusId}`
+    : (raw.paperId ?? "unknown");
   return {
     source: "s2",
     id,
@@ -63,11 +79,16 @@ export function mapS2Paper(raw: RawPaper): Paper {
     title: raw.title ?? "(untitled)",
     year: raw.year ?? undefined,
     venue: raw.venue || undefined,
-    authors: (raw.authors ?? []).map((a) => ({ name: a.name ?? "?", id: a.authorId ?? undefined })),
+    authors: (raw.authors ?? []).map((a) => ({
+      name: a.name ?? "?",
+      id: a.authorId ?? undefined,
+    })),
     citationCount: raw.citationCount ?? undefined,
     doi,
     arxiv,
-    url: raw.paperId ? `https://www.semanticscholar.org/paper/${raw.paperId}` : undefined,
+    url: raw.paperId
+      ? `https://www.semanticscholar.org/paper/${raw.paperId}`
+      : undefined,
     pdfUrl: raw.openAccessPdf?.url || undefined,
     abstract: raw.abstract ?? undefined,
   };
@@ -100,20 +121,42 @@ export function createS2Client(deps: S2Deps) {
     sleep: deps.sleep,
   };
 
-  const get = <T>(path: string, params: Record<string, string | number | undefined>): Promise<T> => {
+  const get = <T>(
+    path: string,
+    params: Record<string, string | number | undefined>,
+  ): Promise<T> => {
     const qs = new URLSearchParams();
-    Object.entries(params).forEach(([k, v]) => v !== undefined && v !== "" && qs.set(k, String(v)));
+    Object.entries(params).forEach(
+      ([k, v]) => v !== undefined && v !== "" && qs.set(k, String(v)),
+    );
+    qs.sort();
     const url = `${BASE}${path}?${qs.toString()}`;
-    return requestJson<T>({ service: "Semantic Scholar", url, init: { headers }, cacheKey: `GET ${url}`, ttlSeconds: TTL_SECONDS, retry, onResponse:deps.onResponse });
+    return requestJson<T>({
+      service: "Semantic Scholar",
+      url,
+      init: { headers },
+      cacheKey: `GET ${url}`,
+      ttlSeconds: TTL_SECONDS,
+      retry,
+      onResponse: deps.onResponse,
+    });
   };
 
-  const post = <T>(path: string, fields: string, ids: readonly string[]): Promise<T> => {
+  const post = <T>(
+    path: string,
+    fields: string,
+    ids: readonly string[],
+  ): Promise<T> => {
     const url = `${BASE}${path}?fields=${encodeURIComponent(fields)}`;
     const body = JSON.stringify({ ids });
     return requestJson<T>({
       service: "Semantic Scholar",
       url,
-      init: { method: "POST", headers: { ...headers, "content-type": "application/json" }, body },
+      init: {
+        method: "POST",
+        headers: { ...headers, "content-type": "application/json" },
+        body,
+      },
       cacheKey: `POST ${url} ${body}`,
       ttlSeconds: TTL_SECONDS,
       retry,
@@ -122,34 +165,70 @@ export function createS2Client(deps: S2Deps) {
   };
 
   return {
-    async recommendations(id:string,limit:number,offset:number):Promise<{papers:Paper[];next?:number}> {
-      if(offset+limit>500)throw new Error("Recommendations support the first 500 results.");
-      const url=`https://api.semanticscholar.org/recommendations/v1/papers/for/${encodeURIComponent(id)}?limit=${Math.min(500,offset+limit+1)}&fields=${encodeURIComponent(PAPER_FIELDS)}`;
-      const result=await requestJson<{recommendedPapers?:RawPaper[]}>({service:"Semantic Scholar",url,init:{headers},cacheKey:`GET ${url}`,retry});
-      const papers=result.recommendedPapers ?? [];
-      return {papers:papers.slice(offset,offset+limit).map(mapS2Paper),next:papers.length>offset+limit?offset+limit:undefined};
+    async recommendations(
+      id: string,
+      limit: number,
+      offset: number,
+    ): Promise<{ papers: Paper[]; next?: number }> {
+      if (offset + limit > 500)
+        throw new Error("Recommendations support the first 500 results.");
+      const url = `https://api.semanticscholar.org/recommendations/v1/papers/for/${encodeURIComponent(id)}?limit=${Math.min(500, offset + limit + 1)}&fields=${encodeURIComponent(PAPER_FIELDS)}`;
+      const result = await requestJson<{ recommendedPapers?: RawPaper[] }>({
+        service: "Semantic Scholar",
+        url,
+        init: { headers },
+        cacheKey: `GET ${url}`,
+        retry,
+      });
+      const papers = result.recommendedPapers ?? [];
+      return {
+        papers: papers.slice(offset, offset + limit).map(mapS2Paper),
+        next: papers.length > offset + limit ? offset + limit : undefined,
+      };
     },
     async searchPapers(
       query: string,
-      opts: { yearFrom?: number; yearTo?: number; venue?: string; limit: number; offset: number },
+      opts: {
+        yearFrom?: number;
+        yearTo?: number;
+        venue?: string;
+        limit: number;
+        offset: number;
+      },
     ): Promise<{ total: number; papers: Paper[] }> {
-      const year = opts.yearFrom || opts.yearTo ? `${opts.yearFrom ?? ""}-${opts.yearTo ?? ""}` : undefined;
-      const res = await get<{ total?: number; data?: RawPaper[] }>("/paper/search", {
-        query: query.replace(/-/g, " "),
-        fields: `${PAPER_FIELDS},abstract`,
-        year,
-        venue: opts.venue,
-        limit: opts.limit,
-        offset: opts.offset,
-      });
-      return { total: res.total ?? 0, papers: (res.data ?? []).map(mapS2Paper) };
+      const year =
+        opts.yearFrom || opts.yearTo
+          ? `${opts.yearFrom ?? ""}-${opts.yearTo ?? ""}`
+          : undefined;
+      const res = await get<{ total?: number; data?: RawPaper[] }>(
+        "/paper/search",
+        {
+          query: query.replace(/-/g, " "),
+          fields: `${PAPER_FIELDS},abstract`,
+          year,
+          venue: opts.venue,
+          limit: opts.limit,
+          offset: opts.offset,
+        },
+      );
+      return {
+        total: res.total ?? 0,
+        papers: (res.data ?? []).map(mapS2Paper),
+      };
     },
 
     /** Up to 500 ids in one request; result is aligned with `ids` (null = not found). */
-    async paperBatch(ids: readonly string[], withAbstract: boolean): Promise<Array<Paper | null>> {
+    async paperBatch(
+      ids: readonly string[],
+      withAbstract: boolean,
+    ): Promise<Array<Paper | null>> {
       if (ids.length === 0) return [];
       const fields = withAbstract ? `${PAPER_FIELDS},abstract` : PAPER_FIELDS;
-      const res = await post<Array<RawPaper | null>>("/paper/batch", fields, ids.slice(0, 500));
+      const res = await post<Array<RawPaper | null>>(
+        "/paper/batch",
+        fields,
+        ids.slice(0, 500),
+      );
       return res.map((p) => (p ? mapS2Paper(p) : null));
     },
 
@@ -161,20 +240,33 @@ export function createS2Client(deps: S2Deps) {
     ): Promise<{ papers: Paper[]; next?: number }> {
       const key = direction === "citations" ? "citingPaper" : "citedPaper";
       try {
-        const res = await get<{ next?: number; data?: Array<Record<string, RawPaper | undefined>> }>(
-          `/paper/${encodeURIComponent(id)}/${direction}`,
-          { fields: LINK_FIELDS, limit, offset },
-        );
-        const papers = (res.data ?? []).map((row) => row[key]).filter((p): p is RawPaper => Boolean(p?.title));
+        const res = await get<{
+          next?: number;
+          data?: Array<Record<string, RawPaper | undefined>>;
+        }>(`/paper/${encodeURIComponent(id)}/${direction}`, {
+          fields: LINK_FIELDS,
+          limit,
+          offset,
+        });
+        const papers = (res.data ?? [])
+          .map((row) => row[key])
+          .filter((p): p is RawPaper => Boolean(p?.title));
         return { papers: papers.map(mapS2Paper), next: res.next };
       } catch (error) {
-        if (error instanceof HttpError && error.status === 404) return { papers: [] };
+        if (error instanceof HttpError && error.status === 404)
+          return { papers: [] };
         throw error;
       }
     },
 
-    async searchAuthors(name: string, limit: number, withPapers: boolean): Promise<AuthorRecord[]> {
-      const fields = withPapers ? `${AUTHOR_FIELDS},${AUTHOR_PAPER_FIELDS}` : AUTHOR_FIELDS;
+    async searchAuthors(
+      name: string,
+      limit: number,
+      withPapers: boolean,
+    ): Promise<AuthorRecord[]> {
+      const fields = withPapers
+        ? `${AUTHOR_FIELDS},${AUTHOR_PAPER_FIELDS}`
+        : AUTHOR_FIELDS;
       const res = await get<{ data?: RawAuthor[] }>("/author/search", {
         query: name.replace(/-/g, " "),
         fields,
@@ -183,11 +275,22 @@ export function createS2Client(deps: S2Deps) {
       return (res.data ?? []).map(mapS2Author);
     },
 
-    async authorBatch(ids: readonly string[], withPapers: boolean): Promise<AuthorRecord[]> {
+    async authorBatch(
+      ids: readonly string[],
+      withPapers: boolean,
+    ): Promise<AuthorRecord[]> {
       if (ids.length === 0) return [];
-      const fields = withPapers ? `${AUTHOR_FIELDS},${AUTHOR_PAPER_FIELDS}` : AUTHOR_FIELDS;
-      const res = await post<Array<RawAuthor | null>>("/author/batch", fields, ids.slice(0, 1000));
-      return res.filter((a): a is RawAuthor => Boolean(a?.authorId)).map(mapS2Author);
+      const fields = withPapers
+        ? `${AUTHOR_FIELDS},${AUTHOR_PAPER_FIELDS}`
+        : AUTHOR_FIELDS;
+      const res = await post<Array<RawAuthor | null>>(
+        "/author/batch",
+        fields,
+        ids.slice(0, 1000),
+      );
+      return res
+        .filter((a): a is RawAuthor => Boolean(a?.authorId))
+        .map(mapS2Author);
     },
   };
 }

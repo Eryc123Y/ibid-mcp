@@ -4,7 +4,9 @@ import type { OAuthHelpers } from "@cloudflare/workers-oauth-provider";
 import type { SourceLimiter } from "./limiter/source-limiter";
 
 export interface AppEnv {
-  readonly PAIRING_STORE: DurableObjectNamespace<import("./auth/pairing-store").PairingStore>;
+  readonly PAIRING_STORE: DurableObjectNamespace<
+    import("./auth/pairing-store").PairingStore
+  >;
   readonly MGMT_TOKEN?: string;
   readonly OAUTH_KV: KVNamespace;
   readonly SOURCE_LIMITER: DurableObjectNamespace<SourceLimiter>;
@@ -18,4 +20,3 @@ export interface AppEnv {
   readonly S2_API_KEY?: string;
   readonly OPENALEX_API_KEY?: string;
 }
-

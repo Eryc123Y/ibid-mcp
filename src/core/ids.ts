@@ -5,7 +5,8 @@
  * OpenAlex (`openalexFilter`, an OpenAlex filter clause, or `openalexId`).
  */
 
-export type PaperIdKind = "s2" | "corpus" | "doi" | "arxiv" | "openalex" | "pmid" | "pmcid";
+export type PaperIdKind =
+  "s2" | "corpus" | "doi" | "arxiv" | "openalex" | "pmid" | "pmcid";
 
 export interface ParsedPaperId {
   readonly kind: PaperIdKind;
@@ -16,7 +17,10 @@ export interface ParsedPaperId {
   /** OpenAlex work id (W...), when known without a lookup. */
   readonly openalexId?: string;
   /** OpenAlex filter attribute and value (for OR-batching), when available. */
-  readonly openalexFilter?: { readonly attr: "doi" | "ids.pmid" | "ids.pmcid"; readonly value: string };
+  readonly openalexFilter?: {
+    readonly attr: "doi" | "ids.pmid" | "ids.pmcid";
+    readonly value: string;
+  };
 }
 
 export class IdParseError extends Error {
@@ -39,11 +43,25 @@ const ARXIV_DOI_RE = /^10\.48550\/arxiv\.(.+)$/i;
 
 function stripUrl(input: string): string {
   const trimmed = input.trim();
-  const patterns: ReadonlyArray<readonly [RegExp, (m: RegExpMatchArray) => string]> = [
-    [/^https?:\/\/(?:dx\.)?doi\.org\/(.+)$/i, (m) => `doi:${decodeURIComponent(m[1] ?? "")}`],
-    [/^https?:\/\/(?:www\.)?arxiv\.org\/(?:abs|pdf|html)\/([^?#]+?)(?:\.pdf)?\/?(?:[?#].*)?$/i, (m) => `arxiv:${m[1] ?? ""}`],
-    [/^https?:\/\/(?:www\.|api\.)?openalex\.org\/(?:works\/)?(w\d+)/i, (m) => m[1] ?? ""],
-    [/^https?:\/\/(?:www\.)?semanticscholar\.org\/paper\/(?:[^/]*\/)?([0-9a-f]{40})/i, (m) => m[1] ?? ""],
+  const patterns: ReadonlyArray<
+    readonly [RegExp, (m: RegExpMatchArray) => string]
+  > = [
+    [
+      /^https?:\/\/(?:dx\.)?doi\.org\/(.+)$/i,
+      (m) => `doi:${decodeURIComponent(m[1] ?? "")}`,
+    ],
+    [
+      /^https?:\/\/(?:www\.)?arxiv\.org\/(?:abs|pdf|html)\/([^?#]+?)(?:\.pdf)?\/?(?:[?#].*)?$/i,
+      (m) => `arxiv:${m[1] ?? ""}`,
+    ],
+    [
+      /^https?:\/\/(?:www\.|api\.)?openalex\.org\/(?:works\/)?(w\d+)/i,
+      (m) => m[1] ?? "",
+    ],
+    [
+      /^https?:\/\/(?:www\.)?semanticscholar\.org\/paper\/(?:[^/]*\/)?([0-9a-f]{40})/i,
+      (m) => m[1] ?? "",
+    ],
   ];
   for (const [re, fn] of patterns) {
     const match = trimmed.match(re);
@@ -56,7 +74,12 @@ function doiId(doi: string): ParsedPaperId {
   const value = doi.toLowerCase();
   const arxiv = value.match(ARXIV_DOI_RE);
   if (arxiv?.[1]) return arxivId(arxiv[1]);
-  return { kind: "doi", value, s2: `DOI:${value}`, openalexFilter: { attr: "doi", value } };
+  return {
+    kind: "doi",
+    value,
+    s2: `DOI:${value}`,
+    openalexFilter: { attr: "doi", value },
+  };
 }
 
 function arxivId(raw: string): ParsedPaperId {
@@ -88,17 +111,28 @@ export function parsePaperId(input: string): ParsedPaperId {
       case "arxiv":
         return arxivId(rest);
       case "corpusid":
-        if (/^\d+$/.test(rest)) return { kind: "corpus", value: rest, s2: `CorpusId:${rest}` };
+        if (/^\d+$/.test(rest))
+          return { kind: "corpus", value: rest, s2: `CorpusId:${rest}` };
         break;
       case "pmid":
         if (/^\d+$/.test(rest)) {
-          return { kind: "pmid", value: rest, s2: `PMID:${rest}`, openalexFilter: { attr: "ids.pmid", value: rest } };
+          return {
+            kind: "pmid",
+            value: rest,
+            s2: `PMID:${rest}`,
+            openalexFilter: { attr: "ids.pmid", value: rest },
+          };
         }
         break;
       case "pmcid": {
         const pmc = rest.replace(/^pmc/i, "");
         if (/^\d+$/.test(pmc)) {
-          return { kind: "pmcid", value: pmc, s2: `PMCID:${pmc}`, openalexFilter: { attr: "ids.pmcid", value: `PMC${pmc}` } };
+          return {
+            kind: "pmcid",
+            value: pmc,
+            s2: `PMCID:${pmc}`,
+            openalexFilter: { attr: "ids.pmcid", value: `PMC${pmc}` },
+          };
         }
         break;
       }
@@ -106,8 +140,14 @@ export function parsePaperId(input: string): ParsedPaperId {
         if (OPENALEX_W_RE.test(rest)) return openalexWork(rest);
         break;
       case "s2":
-        if (S2_SHA_RE.test(rest)) return { kind: "s2", value: rest.toLowerCase(), s2: rest.toLowerCase() };
-        if (/^\d+$/.test(rest)) return { kind: "corpus", value: rest, s2: `CorpusId:${rest}` };
+        if (S2_SHA_RE.test(rest))
+          return {
+            kind: "s2",
+            value: rest.toLowerCase(),
+            s2: rest.toLowerCase(),
+          };
+        if (/^\d+$/.test(rest))
+          return { kind: "corpus", value: rest, s2: `CorpusId:${rest}` };
         break;
       default:
         break;
@@ -116,7 +156,8 @@ export function parsePaperId(input: string): ParsedPaperId {
   }
 
   if (DOI_RE.test(raw)) return doiId(raw);
-  if (S2_SHA_RE.test(raw)) return { kind: "s2", value: raw.toLowerCase(), s2: raw.toLowerCase() };
+  if (S2_SHA_RE.test(raw))
+    return { kind: "s2", value: raw.toLowerCase(), s2: raw.toLowerCase() };
   if (OPENALEX_W_RE.test(raw)) return openalexWork(raw);
   if (ARXIV_NEW_RE.test(raw) || ARXIV_OLD_RE.test(raw)) return arxivId(raw);
   throw new IdParseError(input);
@@ -137,13 +178,19 @@ export interface ParsedAuthorId {
 /** Classify an author argument: S2 author id, OpenAlex A-id, ORCID, or a free-text name. */
 export function parseAuthorId(input: string): ParsedAuthorId {
   const raw = input.trim();
-  const orcid = raw.match(/(?:orcid\.org\/|orcid:\s*)?(\d{4}-\d{4}-\d{4}-\d{3}[\dx])$/i);
+  const orcid = raw.match(
+    /(?:orcid\.org\/|orcid:\s*)?(\d{4}-\d{4}-\d{4}-\d{3}[\dx])$/i,
+  );
   if (orcid?.[1] && (raw.length === orcid[1].length || /orcid/i.test(raw))) {
     return { kind: "orcid", value: orcid[1].toUpperCase() };
   }
-  const oa = raw.match(/^(?:https?:\/\/(?:api\.)?openalex\.org\/(?:authors\/)?)?(a\d+)$/i);
+  const oa = raw.match(
+    /^(?:https?:\/\/(?:api\.)?openalex\.org\/(?:authors\/)?)?(a\d+)$/i,
+  );
   if (oa?.[1]) return { kind: "openalex", value: oa[1].toUpperCase() };
-  const s2 = raw.match(/^(?:s2:|https?:\/\/(?:www\.)?semanticscholar\.org\/author\/(?:[^/]*\/)?)?(\d{3,})$/i);
+  const s2 = raw.match(
+    /^(?:s2:|https?:\/\/(?:www\.)?semanticscholar\.org\/author\/(?:[^/]*\/)?)?(\d{3,})$/i,
+  );
   if (s2?.[1]) return { kind: "s2", value: s2[1] };
   return { kind: "name", value: raw };
 }

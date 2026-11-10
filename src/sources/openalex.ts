@@ -13,7 +13,8 @@ const BASE = "https://api.openalex.org";
 const TTL_SECONDS = 900;
 export const OR_BATCH_MAX = 100;
 
-const WORK_SELECT = "id,doi,display_name,publication_year,primary_location,authorships,cited_by_count,open_access";
+const WORK_SELECT =
+  "id,doi,display_name,publication_year,primary_location,authorships,cited_by_count,open_access";
 const AUTHOR_SELECT =
   "id,display_name,display_name_alternatives,orcid,works_count,cited_by_count,summary_stats,last_known_institutions,affiliations";
 
@@ -21,10 +22,10 @@ export interface OpenAlexDeps {
   readonly apiKey?: string;
   readonly mailto?: string;
   readonly fetchImpl?: typeof fetch;
-  readonly sleep?: (ms:number)=>Promise<void>;
+  readonly sleep?: (ms: number) => Promise<void>;
   readonly acquire?: () => Promise<void>;
-  readonly penalize?: (ms:number) => Promise<void>;
-  readonly onResponse?: (response:Response) => Promise<void>;
+  readonly penalize?: (ms: number) => Promise<void>;
+  readonly onResponse?: (response: Response) => Promise<void>;
 }
 
 interface RawWork {
@@ -32,8 +33,12 @@ interface RawWork {
   readonly doi?: string | null;
   readonly display_name?: string | null;
   readonly publication_year?: number | null;
-  readonly primary_location?: { source?: { display_name?: string | null } | null } | null;
-  readonly authorships?: Array<{ author?: { id?: string | null; display_name?: string | null } | null }> | null;
+  readonly primary_location?: {
+    source?: { display_name?: string | null } | null;
+  } | null;
+  readonly authorships?: Array<{
+    author?: { id?: string | null; display_name?: string | null } | null;
+  }> | null;
   readonly cited_by_count?: number | null;
   readonly open_access?: { oa_url?: string | null } | null;
   readonly abstract_inverted_index?: Record<string, number[]> | null;
@@ -48,8 +53,12 @@ interface RawAuthor {
   readonly works_count?: number | null;
   readonly cited_by_count?: number | null;
   readonly summary_stats?: { h_index?: number | null } | null;
-  readonly last_known_institutions?: Array<{ display_name?: string | null }> | null;
-  readonly affiliations?: Array<{ institution?: { display_name?: string | null } | null }> | null;
+  readonly last_known_institutions?: Array<{
+    display_name?: string | null;
+  }> | null;
+  readonly affiliations?: Array<{
+    institution?: { display_name?: string | null } | null;
+  }> | null;
 }
 
 interface ListResponse<T> {
@@ -61,15 +70,24 @@ interface ListResponse<T> {
 let lastBudget: { remaining: number; limit: number } | undefined;
 
 export function shortId(url: string | null | undefined): string {
-  return (url ?? "").replace(/^https?:\/\/(?:api\.)?openalex\.org\/(?:works\/|authors\/)?/i, "").toUpperCase();
+  return (url ?? "")
+    .replace(/^https?:\/\/(?:api\.)?openalex\.org\/(?:works\/|authors\/)?/i, "")
+    .toUpperCase();
 }
 
 /** Rebuild plain text from OpenAlex's abstract_inverted_index. */
-export function abstractFromInvertedIndex(index: Record<string, number[]> | null | undefined): string | undefined {
+export function abstractFromInvertedIndex(
+  index: Record<string, number[]> | null | undefined,
+): string | undefined {
   if (!index) return undefined;
   const words: string[] = [];
-  Object.entries(index).forEach(([word, positions]) => positions.forEach((p) => (words[p] = word)));
-  const text = words.filter((w) => w !== undefined).join(" ").trim();
+  Object.entries(index).forEach(([word, positions]) =>
+    positions.forEach((p) => (words[p] = word)),
+  );
+  const text = words
+    .filter((w) => w !== undefined)
+    .join(" ")
+    .trim();
   return text.length > 0 ? text : undefined;
 }
 
@@ -84,7 +102,10 @@ export function mapWork(raw: RawWork): Paper {
     title: raw.display_name ?? "(untitled)",
     year: raw.publication_year ?? undefined,
     venue: raw.primary_location?.source?.display_name ?? undefined,
-    authors: (raw.authorships ?? []).map((a) => ({ name: a.author?.display_name ?? "?", id: shortId(a.author?.id) || undefined })),
+    authors: (raw.authorships ?? []).map((a) => ({
+      name: a.author?.display_name ?? "?",
+      id: shortId(a.author?.id) || undefined,
+    })),
     citationCount: raw.cited_by_count ?? undefined,
     doi,
     arxiv,
@@ -108,7 +129,9 @@ function mapAuthor(raw: RawAuthor): AuthorRecord {
     paperCount: raw.works_count ?? undefined,
     citationCount: raw.cited_by_count ?? undefined,
     hIndex: raw.summary_stats?.h_index ?? undefined,
-    orcid: raw.orcid ? raw.orcid.replace(/^https?:\/\/orcid\.org\//, "") : undefined,
+    orcid: raw.orcid
+      ? raw.orcid.replace(/^https?:\/\/orcid\.org\//, "")
+      : undefined,
     papers: [],
   };
 }
@@ -126,7 +149,11 @@ export function budgetNotice(): Notice | undefined {
 export function recordBudget(headers: Headers): void {
   const remaining = Number(headers.get("x-ratelimit-remaining"));
   const limit = Number(headers.get("x-ratelimit-limit"));
-  if (Number.isFinite(remaining) && Number.isFinite(limit) && headers.has("x-ratelimit-limit")) {
+  if (
+    Number.isFinite(remaining) &&
+    Number.isFinite(limit) &&
+    headers.has("x-ratelimit-limit")
+  ) {
     lastBudget = { remaining, limit };
   }
 }
@@ -137,10 +164,16 @@ function filterValue(v: string): string {
 }
 
 export function createOpenAlexClient(deps: OpenAlexDeps) {
-  const get = <T>(path: string, params: Record<string, string | number | undefined>): Promise<T> => {
+  const get = <T>(
+    path: string,
+    params: Record<string, string | number | undefined>,
+  ): Promise<T> => {
     const qs = new URLSearchParams();
-    Object.entries(params).forEach(([k, v]) => v !== undefined && v !== "" && qs.set(k, String(v)));
+    Object.entries(params).forEach(
+      ([k, v]) => v !== undefined && v !== "" && qs.set(k, String(v)),
+    );
     if (deps.mailto) qs.set("mailto", deps.mailto);
+    qs.sort();
     const publicUrl = `${BASE}${path}?${qs.toString()}`;
     if (deps.apiKey) qs.set("api_key", deps.apiKey);
     return requestJson<T>({
@@ -149,20 +182,47 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
       init: { headers: { accept: "application/json" } },
       cacheKey: `GET ${publicUrl}`, // never includes api_key
       ttlSeconds: TTL_SECONDS,
-      retry: { retries: 1, baseDelayMs: 1000, fetchImpl: deps.fetchImpl, sleep:deps.sleep, beforeAttempt:deps.acquire, onThrottled:deps.penalize },
-      onResponse: async (r) => {recordBudget(r.headers);await deps.onResponse?.(r);},
+      retry: {
+        retries: 1,
+        baseDelayMs: 1000,
+        fetchImpl: deps.fetchImpl,
+        sleep: deps.sleep,
+        beforeAttempt: deps.acquire,
+        onThrottled: deps.penalize,
+      },
+      onResponse: async (r) => {
+        recordBudget(r.headers);
+        await deps.onResponse?.(r);
+      },
     });
   };
 
-  const works = async (filter: string, perPage: number, extra: Record<string, string | undefined> = {}) => {
-    const res = await get<ListResponse<RawWork>>("/works", { filter, per_page: perPage, select: WORK_SELECT, ...extra });
-    return { count: res.meta?.count ?? 0, papers: (res.results ?? []).map(mapWork) };
+  const works = async (
+    filter: string,
+    perPage: number,
+    extra: Record<string, string | undefined> = {},
+  ) => {
+    const res = await get<ListResponse<RawWork>>("/works", {
+      filter,
+      per_page: perPage,
+      select: WORK_SELECT,
+      ...extra,
+    });
+    return {
+      count: res.meta?.count ?? 0,
+      papers: (res.results ?? []).map(mapWork),
+    };
   };
 
   return {
-    async searchWorks(query: string, opts: { yearFrom?: number; yearTo?: number; limit: number; page: number }) {
+    async searchWorks(
+      query: string,
+      opts: { yearFrom?: number; yearTo?: number; limit: number; page: number },
+    ) {
       const filters = [
-        opts.yearFrom ? `from_publication_date:${opts.yearFrom}-01-01` : undefined,
+        opts.yearFrom
+          ? `from_publication_date:${opts.yearFrom}-01-01`
+          : undefined,
         opts.yearTo ? `to_publication_date:${opts.yearTo}-12-31` : undefined,
       ].filter(Boolean);
       const res = await get<ListResponse<RawWork>>("/works", {
@@ -172,17 +232,27 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
         page: opts.page,
         select: `${WORK_SELECT},abstract_inverted_index`,
       });
-      return { count: res.meta?.count ?? 0, papers: (res.results ?? []).map(mapWork) };
+      return {
+        count: res.meta?.count ?? 0,
+        papers: (res.results ?? []).map(mapWork),
+      };
     },
 
     /** Look up works by DOI / W-id / PMID in OR-batched requests. */
     async worksByIds(
-      ids: ReadonlyArray<{ attr: "doi" | "ids.openalex" | "ids.pmid" | "ids.pmcid"; value: string }>,
+      ids: ReadonlyArray<{
+        attr: "doi" | "ids.openalex" | "ids.pmid" | "ids.pmcid";
+        value: string;
+      }>,
       withAbstract: boolean,
     ): Promise<Paper[]> {
-      const select = withAbstract ? `${WORK_SELECT},abstract_inverted_index` : WORK_SELECT;
+      const select = withAbstract
+        ? `${WORK_SELECT},abstract_inverted_index`
+        : WORK_SELECT;
       const byAttr = new Map<string, string[]>();
-      ids.forEach(({ attr, value }) => byAttr.set(attr, [...(byAttr.get(attr) ?? []), filterValue(value)]));
+      ids.forEach(({ attr, value }) =>
+        byAttr.set(attr, [...(byAttr.get(attr) ?? []), filterValue(value)]),
+      );
       const out: Paper[] = [];
       for (const [attr, values] of byAttr) {
         for (let i = 0; i < values.length; i += OR_BATCH_MAX) {
@@ -199,20 +269,32 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
     },
 
     citingWorks(workId: string, limit: number, page: number) {
-      return works(`cites:${workId}`, limit, { page: String(page), sort: "cited_by_count:desc" });
+      return works(`cites:${workId}`, limit, {
+        page: String(page),
+        sort: "cited_by_count:desc",
+      });
     },
 
     async referencedWorkIds(workId: string): Promise<string[]> {
-      const res = await get<RawWork>(`/works/${workId}`, { select: "id,referenced_works" });
+      const res = await get<RawWork>(`/works/${workId}`, {
+        select: "id,referenced_works",
+      });
       return (res.referenced_works ?? []).map(shortId);
     },
 
     async searchAuthors(name: string, limit: number): Promise<AuthorRecord[]> {
-      const res = await get<ListResponse<RawAuthor>>("/authors", { search: name, per_page: limit, select: AUTHOR_SELECT });
+      const res = await get<ListResponse<RawAuthor>>("/authors", {
+        search: name,
+        per_page: limit,
+        select: AUTHOR_SELECT,
+      });
       return (res.results ?? []).map(mapAuthor);
     },
 
-    async authorsByIds(attr: "ids.openalex" | "orcid", values: readonly string[]): Promise<AuthorRecord[]> {
+    async authorsByIds(
+      attr: "ids.openalex" | "orcid",
+      values: readonly string[],
+    ): Promise<AuthorRecord[]> {
       if (values.length === 0) return [];
       const res = await get<ListResponse<RawAuthor>>("/authors", {
         filter: `${attr}:${values.slice(0, OR_BATCH_MAX).map(filterValue).join("|")}`,
@@ -223,17 +305,44 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
     },
 
     /** Works by any of the given authors (one OR-batched request). */
-    worksByAuthors(authorIds: readonly string[], limit: number, sort: "recent" | "cited") {
-      return works(`author.id:${authorIds.slice(0, OR_BATCH_MAX).join("|")}`, limit, {
-        sort: sort === "recent" ? "publication_date:desc" : "cited_by_count:desc",
-      });
+    worksByAuthors(
+      authorIds: readonly string[],
+      limit: number,
+      sort: "recent" | "cited",
+    ) {
+      return works(
+        `author.id:${authorIds.slice(0, OR_BATCH_MAX).join("|")}`,
+        limit,
+        {
+          sort:
+            sort === "recent" ? "publication_date:desc" : "cited_by_count:desc",
+        },
+      );
+    },
+
+    sharedWorksMany(groups: readonly (readonly string[])[], limit: number) {
+      return works(
+        groups
+          .map((group) => `author.id:${group.slice(0, OR_BATCH_MAX).join("|")}`)
+          .join(","),
+        limit,
+        { sort: "publication_date:desc" },
+      );
     },
 
     /** Works with at least one author from each group (filters joined by "," are ANDed). */
-    sharedWorks(groupA: readonly string[], groupB: readonly string[], limit: number) {
-      return works(`author.id:${groupA.slice(0, OR_BATCH_MAX).join("|")},author.id:${groupB.slice(0, OR_BATCH_MAX).join("|")}`, limit, {
-        sort: "publication_date:desc",
-      });
+    sharedWorks(
+      groupA: readonly string[],
+      groupB: readonly string[],
+      limit: number,
+    ) {
+      return works(
+        `author.id:${groupA.slice(0, OR_BATCH_MAX).join("|")},author.id:${groupB.slice(0, OR_BATCH_MAX).join("|")}`,
+        limit,
+        {
+          sort: "publication_date:desc",
+        },
+      );
     },
   };
 }

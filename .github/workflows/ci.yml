@@ -1,0 +1,52 @@
+name: Local checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      require_evaluation:
+        description: Fail if the recorded 600-paper evaluation snapshot is absent
+        type: boolean
+        default: true
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run test:coverage
+      - run: npm run test:worker
+      - run: node dist/cli/index.js --help
+      - run: npm pack --dry-run --ignore-scripts
+      - name: Offline title coverage evaluation
+        env:
+          REQUIRE_EVALUATION: ${{ inputs.require_evaluation }}
+        run: |
+          set +e
+          npm run test:eval
+          result=$?
+          set -e
+          if [ "$result" = 2 ] && [ "$REQUIRE_EVALUATION" != true ]; then
+            echo '::warning::P5 is unverified: the original 600-paper snapshot is absent. This is not a passing coverage result.'
+          else
+            exit "$result"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checks-node-${{ matrix.node }}
+          path: |
+            coverage/coverage-summary.json
+            .artifacts/coverage-eval.json
