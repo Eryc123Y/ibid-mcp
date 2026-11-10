@@ -1,8 +1,9 @@
+import {compactPaper} from "./search";
 /** Paper tools: search_papers, get_paper, paper_links. Each returns compact text. */
 
 import { dedupePapers } from "../core/dedupe";
-import { paperDetail, paperLine } from "../core/format";
-import { IdParseError, type ParsedPaperId, parsePaperId } from "../core/ids";
+import { paperLine } from "../core/format";
+import { type ParsedPaperId, parsePaperId } from "../core/ids";
 import { titleKey, paperKeys } from "../core/normalize";
 import type { Paper } from "../core/types";
 import { type ToolContext, withFallback, optional } from "./context";
@@ -44,16 +45,8 @@ async function s2AddressFor(ctx: ToolContext, parsed: readonly ParsedPaperId[]):
   return out;
 }
 
-async function getByIds(ctx: ToolContext, ids: readonly string[], full: boolean): Promise<string> {
-  const errors: string[] = [];
-  const parsed: ParsedPaperId[] = [];
-  ids.forEach((raw) => {
-    try {
-      parsed.push(parsePaperId(raw));
-    } catch (e) {
-      errors.push(e instanceof IdParseError ? e.message : String(e));
-    }
-  });
+async function getByIds(ctx: ToolContext, ids: readonly string[]): Promise<Array<Paper | null>> {
+  const parsed = ids.map(parsePaperId);
 
   const s2Results = await withFallback(
     ctx,
@@ -84,11 +77,11 @@ async function getByIds(ctx: ToolContext, ids: readonly string[], full: boolean)
     const s2 = s2Results.get(i);
     const oa = oaWorks.find((w) => (s2 ? paperKeys(w).some((k) => paperKeys(s2).includes(k)) : matchesId(w, p)));
     const merged = s2 && oa ? dedupePapers([s2, oa])[0] : (s2 ?? oa);
-    if (!merged) return `Not found: ${ids[i] ?? p.value}`;
+    if (!merged) return null;
     const withAbstract = s2 && !s2.abstract && oa?.abstract ? { ...merged, abstract: oa.abstract } : merged;
-    return paperDetail(withAbstract, full);
+    return withAbstract;
   });
-  return [...errors, ...blocks].join("\n\n");
+  return blocks;
 }
 
 export interface LinksArgs {
@@ -134,17 +127,23 @@ export async function paperLinks(ctx: ToolContext, args: LinksArgs): Promise<str
   return `${label} ${args.id} (${result.source}, ${result.papers.length} shown):\n${lines.join("\n")}${next}`;
 }
 
-/** Titles are resolved conservatively: exact normalized title, not merely the first hit. */
-export async function getPapers(ctx:ToolContext, ids:readonly string[],full:boolean):Promise<string> {
+/** Resolve ids in one batch; title matching never silently selects an unrelated first hit. */
+export async function getPapers(ctx:ToolContext, ids:readonly string[],full:boolean) {
   if(ids.length<1 || ids.length>20)throw new Error('Provide between 1 and 20 papers.');
   const identifiers:string[]=[];const titles:string[]=[];
   for(const id of ids){try{parsePaperId(id);identifiers.push(id);}catch{titles.push(id);}}
-  const blocks=identifiers.length?[await getByIds(ctx,identifiers,full)]:[];
+  const resolved=new Map<string,Paper>();
+  if(identifiers.length){const found=await getByIds(ctx,identifiers);found.forEach((paper,i)=>{if(paper)resolved.set(identifiers[i]!,paper);});}
   for(const title of titles){
     const results=await withFallback(ctx,()=>ctx.s2.searchPapers(title,{limit:5,offset:0}),async()=>{const r=await ctx.oa.searchWorks(title,{limit:5,page:1});return {total:r.count,papers:r.papers};});
     let match=results.papers.find(p=>titleKey(p.title)===titleKey(title));
     if(!match){const oa=await optional(()=>ctx.oa.searchWorks(title,{limit:5,page:1}),{count:0,papers:[]});match=oa.papers.find(p=>titleKey(p.title)===titleKey(title));}
-    blocks.push(match?paperDetail(match,full):'Not found: '+title);
+    if(match)resolved.set(title,match);
   }
-  return blocks.join('\n\n');
+  const papers=[];
+  for(const requested of ids){const paper=resolved.get(requested);if(!paper)continue;
+    const oa=ctx.core?await optional(()=>ctx.core!.lookup(paper),null):null;
+    papers.push({...compactPaper(paper,full),requested,oa});
+  }
+  return {papers,not_found:ids.filter(id=>!resolved.has(id))};
 }

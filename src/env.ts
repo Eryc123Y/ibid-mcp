@@ -14,6 +14,7 @@ export interface AppEnv {
   readonly PUBLIC_URL: string;
 
   readonly CONSENT_SECRET?: string;
+  readonly CORE_API_KEY?: string;
   readonly S2_API_KEY?: string;
   readonly OPENALEX_API_KEY?: string;
 }

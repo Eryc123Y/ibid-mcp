@@ -130,8 +130,8 @@ describe("S2 rate-limit fallback", () => {
     ]);
     const ctx = context(mock, true);
     const text = await getPapers(ctx, ["10.1234/shared"], false);
-    expect(text).toMatch(/\[W10\] Shared Work on Graph Testing/);
-    expect(text).toMatch(/Abstract: Hello world/);
+    expect(text.papers[0]).toMatchObject({id:"W10",title:"Shared Work on Graph Testing"});
+    expect(text.papers[0]?.abstract).toBe("Hello world");
     expect(ctx.notices[0]?.text).toMatch(/queue is full .*fell back to OpenAlex/);
     expect(mock.calls.every((c) => c.url.hostname === "api.openalex.org")).toBe(true);
   });

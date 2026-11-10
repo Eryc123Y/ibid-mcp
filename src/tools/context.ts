@@ -6,7 +6,9 @@ import { createS2Client, type S2Client } from '../sources/s2';
 import { track, failureReason, type SourceReport } from './provenance';
 import {createArxivClient,type ArxivClient} from "../sources/arxiv";
 import {createOpenReviewClient,type OpenReviewClient} from "../sources/openreview";
+import {createCoreClient,type CoreClient} from "../sources/core";
 export interface ToolContext {
+  readonly core?:CoreClient;
   readonly openreview?:OpenReviewClient;
   readonly arxiv?:ArxivClient;
   readonly s2:S2Client;
@@ -16,7 +18,7 @@ export interface ToolContext {
 }
 export function createToolContext(env:AppEnv):ToolContext {
   const report:SourceReport={sources_used:[],sources_skipped:[]};
-  return {openreview:track(createOpenReviewClient(sourceDeps(env,"openreview")),"openreview",report),arxiv:track(createArxivClient({fetchImpl:async(input)=>{const r=await limiter(env,"arxiv").arxivFetch(String(input));return new Response(r.body,{status:r.status,headers:r.headers});}}),"arxiv",report),s2:track(createS2Client({apiKey:env.S2_API_KEY || undefined,...sourceDeps(env,'s2')}),'s2',report),
+  return {core:track(createCoreClient({apiKey:env.CORE_API_KEY,...sourceDeps(env,"core")}),"core",report),openreview:track(createOpenReviewClient(sourceDeps(env,"openreview")),"openreview",report),arxiv:track(createArxivClient({fetchImpl:async(input)=>{const r=await limiter(env,"arxiv").arxivFetch(String(input));return new Response(r.body,{status:r.status,headers:r.headers});}}),"arxiv",report),s2:track(createS2Client({apiKey:env.S2_API_KEY || undefined,...sourceDeps(env,'s2')}),'s2',report),
     oa:track(createOpenAlexClient({apiKey:env.OPENALEX_API_KEY || undefined,...sourceDeps(env,'openalex')}),'openalex',report),notices:[],report};
 }
 export function sourceReport(ctx:ToolContext):SourceReport {return ctx.report ?? {sources_used:[],sources_skipped:[]};}

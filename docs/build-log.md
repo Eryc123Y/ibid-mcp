@@ -39,3 +39,9 @@
 - Wrote failing tests for forum/title/arXiv resolution, official-review filtering, rating summaries, compact/full output and missing ratings, then added OpenReview API v2 and the reviews tool.
 - Ambiguous title matches require a forum ID instead of silently selecting one. Only public official reviews contribute to statistics; meta reviews are excluded. Pagination reports truncation.
 - Validation: 105 tests, typecheck, lint and bundle build passed. Read the official OpenReview client/documentation only.
+
+## P3d
+
+- Added failing tests for CORE authorization, keyless skip, unrelated-hit rejection and search/get_paper integration, then implemented the adapter.
+- get_paper now returns structured paper rows with an oa block. CORE snippets are bounded and identify whether they come from full text or an abstract. No full-text response caching or PDF downloading occurs.
+- Validation: 109 tests, typecheck, lint and bundle build passed. CORE documentation endpoint returned 403; fixtures model the documented v3 fields, with live compatibility explicitly unverified.

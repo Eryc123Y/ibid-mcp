@@ -13,7 +13,7 @@ it('resolves a title alongside batched ids and rejects an oversized batch',async
  {match:isOA('/works'),respond:()=>json({results:[]})},
  ]).fetch);
  const result=await getPapers(createToolContext(env),['The exact paper title','CorpusId:1'],false);
- expect(result).toContain('The exact paper title');expect(result).toContain('An id result');
+ expect(result.papers.map(p=>p.title)).toEqual(['The exact paper title','An id result']);
  await expect(getPapers(createToolContext(env),Array.from({length:21},()=> 'CorpusId:1'),false)).rejects.toThrow('20');
 });
 it('paginates Semantic Scholar recommendations',async()=>{

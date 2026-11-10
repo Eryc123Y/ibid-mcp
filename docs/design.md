@@ -106,3 +106,10 @@ its [official client](https://github.com/openreview/openreview-py/blob/master/op
 Only Official_Review/Review invitations contribute ratings; population standard
 deviation is reported. Private reviews are neither requested nor inferred.
 Forum pagination is bounded at 1,000 notes and marks truncation explicitly.
+
+CORE uses its [v3 API](https://core.ac.uk/services/api), with the user's Bearer key
+and the shared source limiter. Its [terms](https://core.ac.uk/terms) apply to the
+underlying content. LitScout returns repository links and at most 300 characters,
+labels abstract versus full-text snippets, and does not cache fullText responses.
+The v3 documentation endpoint was inaccessible during this build; live response
+compatibility remains a maintainer smoke-check item.

@@ -1,7 +1,9 @@
+import {MissingCoreKeyError} from "../sources/core";
 import { HttpError } from '../http/json';
 import { RateLimitedError } from '../limiter/source-limiter';
 export interface SourceReport { sources_used:string[]; sources_skipped:Array<{source:string;reason:string}> }
 export function failureReason(error:unknown):string {
+  if(error instanceof MissingCoreKeyError)return error.message;
   if(error instanceof RateLimitedError)return error.message;
   if(error instanceof HttpError)return `HTTP ${error.status}`;
   return 'Source unavailable or invalid response';
