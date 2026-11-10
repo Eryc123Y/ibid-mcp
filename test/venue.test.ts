@@ -94,3 +94,82 @@ it("fetches only official publication/export locations and merges rank records",
   expect(table.venues[0]?.ranks).toHaveLength(2);
   expect(fetchImpl).toHaveBeenCalledTimes(3);
 });
+it("keeps centered publisher fragments out of a wrapped renamed venue title", () => {
+  const item = (str: string, x: number, y: number, width: number) => ({
+    str,
+    x,
+    y,
+    width,
+  });
+  const result = parseCcfPages(
+    [
+      [
+        item("（2026年）", 100, 700, 50),
+        item("三、C 类", 10, 650, 40),
+        item("序号", 10, 620, 20),
+        item("期刊简称", 70, 620, 45),
+        item("期刊全称", 260, 620, 45),
+        item("出版社", 410, 620, 33),
+        item("1", 10, 580, 6),
+        item("NEW", 70, 586, 30),
+        item("（原 OLD）", 60, 574, 65),
+        item("New Journal of Synthetic Systems", 150, 596, 240),
+        item("（原 Journal of Synthetic", 180, 582, 180),
+        item("Widgets）", 240, 568, 60),
+        item("Example Press", 390, 586, 70),
+        item("（原", 392, 574, 25),
+        item(" Publisher）", 417, 574, 45),
+        item("https://publisher.example/new", 500, 580, 150),
+      ],
+    ],
+    "https://ranking.example/",
+    [
+      [
+        [50, 610, 140, 640],
+        [380, 610, 480, 640],
+      ],
+    ],
+  );
+  expect(result[0]).toMatchObject({
+    name: "New Journal of Synthetic Systems （原 Journal of Synthetic Widgets）",
+    acronym: "NEW（原 OLD）",
+  });
+  expect(result[0]?.dblp).toBeUndefined();
+});
+it("keeps a long former acronym and its closing bracket inside the acronym cell", () => {
+  const item = (str: string, x: number, y: number, width = 30) => ({
+    str,
+    x,
+    y,
+    width,
+  });
+  const result = parseCcfPages(
+    [
+      [
+        item("（2026年）", 100, 700),
+        item("一、A 类", 10, 650),
+        item("序号", 10, 620),
+        item("会议简称", 70, 620, 40),
+        item("出版社", 400, 620),
+        item("1", 10, 580),
+        item("NEW ATC", 60, 586, 65),
+        item("（原 OLD ATC", 50, 574, 80),
+        item("）", 132, 574, 10),
+        item("Synthetic Annual Conference", 200, 580, 150),
+        item("https://dblp.org/db/conf/invented/", 500, 580, 150),
+      ],
+    ],
+    "https://ranking.example/",
+    [
+      [
+        [45, 610, 150, 640],
+        [380, 610, 480, 640],
+      ],
+    ],
+  );
+  expect(result[0]).toMatchObject({
+    name: "Synthetic Annual Conference",
+    acronym: "NEW ATC（原 OLD ATC）",
+    dblp: "conf/invented",
+  });
+});

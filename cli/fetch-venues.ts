@@ -1,4 +1,5 @@
 import { parse } from "csv-parse/sync";
+import { headerCell, tableRects, type Rect } from "./pdf-table";
 import type { VenueRecord, VenueTable } from "../src/sources/venue";
 const CCF = "https://www.ccf.org.cn/Academic_Evaluation/By_category/";
 const ICORE =
@@ -55,6 +56,7 @@ function lines(items: PdfItem[]): string[] {
 export function parseCcfPages(
   pages: PdfItem[][],
   source: string,
+  cells: Rect[][] = [],
 ): VenueRecord[] {
   const year = Number(
     pages
@@ -65,7 +67,7 @@ export function parseCcfPages(
   if (!year) throw new Error("CCF edition year missing");
   let rank: string | undefined;
   const venues: VenueRecord[] = [];
-  for (const page of pages) {
+  for (const [pageIndex, page] of pages.entries()) {
     const items = page.filter((i) => i.str.trim());
     const rankLine = lines(items).find((s) => /[ABC]\s*类/.test(s));
     if (rankLine) rank = rankLine.match(/([ABC])\s*类/)?.[1];
@@ -81,7 +83,12 @@ export function parseCcfPages(
           /^\d+$/.test(i.str),
       )
       .sort((a, b) => b.y - a.y);
-    const titleLeft = acronymHead.x + (acronymHead.width ?? 45) + 15;
+    const acronymCell = headerCell(cells[pageIndex] ?? [], acronymHead);
+    const publisherCell = headerCell(cells[pageIndex] ?? [], publisherHead);
+    const titleLeft =
+      acronymCell?.[2] ?? acronymHead.x + (acronymHead.width ?? 45) + 15;
+    const titleRight = publisherCell?.[0] ?? publisherHead.x - 15;
+    const linkLeft = publisherCell?.[2] ?? publisherHead.x + 25;
     for (let index = 0; index < anchors.length; index++) {
       const anchor = anchors[index]!;
       const top =
@@ -92,10 +99,7 @@ export function parseCcfPages(
           : (anchors[index + 1]!.y + anchor.y) / 2;
       const row = items.filter((i) => i.y < top && i.y >= bottom);
       const titleItems = row.filter(
-        (i) =>
-          i.x >= titleLeft &&
-          i.x < publisherHead.x - 15 &&
-          !/出版社/.test(i.str),
+        (i) => i.x >= titleLeft && i.x < titleRight && !/出版社/.test(i.str),
       );
       const name = lines(titleItems).join(" ").replace(/\s+/g, " ").trim();
       const acronym = lines(
@@ -103,7 +107,7 @@ export function parseCcfPages(
       )
         .join("")
         .trim();
-      const link = lines(row.filter((i) => i.x >= publisherHead.x + 25))
+      const link = lines(row.filter((i) => i.x >= linkLeft))
         .join("")
         .replace(/\s+/g, "");
       const dblp = link.match(/\/db\/((?:conf|journals)\/[^/\s]+)/)?.[1];
@@ -124,7 +128,7 @@ export async function parseCcfPdf(
   bytes: Uint8Array,
   source: string,
 ): Promise<VenueRecord[]> {
-  const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const { getDocument, OPS } = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const task = getDocument({
     data: bytes,
     disableFontFace: true,
@@ -133,8 +137,11 @@ export async function parseCcfPdf(
   try {
     const document = await task.promise;
     const pages: PdfItem[][] = [];
+    const cells: Rect[][] = [];
     for (let number = 1; number <= document.numPages; number++) {
-      const content = await (await document.getPage(number)).getTextContent();
+      const page = await document.getPage(number);
+      const content = await page.getTextContent();
+      cells.push(tableRects(await page.getOperatorList(), OPS));
       pages.push(
         content.items.flatMap((item) =>
           "str" in item
@@ -150,7 +157,7 @@ export async function parseCcfPdf(
         ),
       );
     }
-    return parseCcfPages(pages, source);
+    return parseCcfPages(pages, source, cells);
   } finally {
     await task.destroy();
   }

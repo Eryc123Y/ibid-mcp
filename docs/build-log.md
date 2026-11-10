@@ -97,3 +97,17 @@
   evaluator changes. Per-venue shortfall and reproduction steps: p5-round2.md.
 - Before commit: all seven prescribed checks passed (165 tests); four code
   coverage metrics above 80%, identifier scan and whitespace checks clean.
+
+## Round 2 — item 3
+
+- Downloaded the official CCF PDF and ICORE CSV into ignored local artifacts;
+  parsed 558 and 987 rows respectively. Independently checked 40 source rows.
+- Found four failures in the sample: publisher text leaked into three titles;
+  one long former acronym lost its closing bracket to the title. An invented
+  regression failed first, then actual PDF cell bounds fixed the column split.
+- Rechecked all 40 rows successfully. Whole-file comparison changes 26 CCF
+  names/acronyms, with counts/ranks/DBLP keys unchanged. All six missing DBLP
+  stream URLs are genuine source omissions/non-stream links. See venue-parse-check.md.
+- Downloaded files, full tables and real audit expectations remain untracked.
+  Before commit: all seven prescribed checks passed (168 tests), four coverage
+  metrics at least 80%, identifier scan and diff whitespace checks clean.
