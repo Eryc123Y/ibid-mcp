@@ -20,3 +20,10 @@
 - Deployment state/config use mode 0600 in a mode-0700 directory. Source secrets exist only in temporary mode-0600 files, cleaned even after upload failure. Incomplete deployment state is retained for retry; destroy requires an explicit typed confirmation.
 - Built the Worker and executable CLI with esbuild and verified the built CLI help. All Wrangler commands, including login/deploy/delete, were mocked; none were executed.
 - Validation: 90 tests, strict typecheck, ESLint and local bundle build passed.
+
+## P3a
+
+- Failing regressions covered persistent per-source scheduling, keyless/keyed intervals, quota warnings at 20%, fan-out, partial failure, title/year deduplication, title lookup and recommendation pagination.
+- Replaced the S2-only object with SourceLimiter instances named by source. Search combines S2 and OpenAlex, fills missing metadata, and trims abstracts to 300 characters. Every executed tool reports source successes/failures; upstream error bodies are not returned.
+- Long Retry-After values now postpone the shared source instead of retrying prematurely; bounded retries use jitter. Added title lookup and recommendation pagination required by the seven-tool specification.
+- Validation: 98 tests, typecheck, lint and bundle build passed. No upstream API calls.

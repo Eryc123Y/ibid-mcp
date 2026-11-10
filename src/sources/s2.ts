@@ -22,6 +22,7 @@ export interface S2Deps {
   readonly acquire: () => Promise<void>;
   readonly penalize: (delayMs: number) => Promise<void>;
   readonly fetchImpl?: typeof fetch;
+  readonly onResponse?: (response:Response) => Promise<void>;
 }
 
 interface RawAuthor {
@@ -101,7 +102,7 @@ export function createS2Client(deps: S2Deps) {
     const qs = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => v !== undefined && v !== "" && qs.set(k, String(v)));
     const url = `${BASE}${path}?${qs.toString()}`;
-    return requestJson<T>({ service: "Semantic Scholar", url, init: { headers }, cacheKey: `GET ${url}`, ttlSeconds: TTL_SECONDS, retry });
+    return requestJson<T>({ service: "Semantic Scholar", url, init: { headers }, cacheKey: `GET ${url}`, ttlSeconds: TTL_SECONDS, retry, onResponse:deps.onResponse });
   };
 
   const post = <T>(path: string, fields: string, ids: readonly string[]): Promise<T> => {
@@ -114,10 +115,18 @@ export function createS2Client(deps: S2Deps) {
       cacheKey: `POST ${url} ${body}`,
       ttlSeconds: TTL_SECONDS,
       retry,
+      onResponse: deps.onResponse,
     });
   };
 
   return {
+    async recommendations(id:string,limit:number,offset:number):Promise<{papers:Paper[];next?:number}> {
+      if(offset+limit>500)throw new Error("Recommendations support the first 500 results.");
+      const url=`https://api.semanticscholar.org/recommendations/v1/papers/for/${encodeURIComponent(id)}?limit=${Math.min(500,offset+limit+1)}&fields=${encodeURIComponent(PAPER_FIELDS)}`;
+      const result=await requestJson<{recommendedPapers?:RawPaper[]}>({service:"Semantic Scholar",url,init:{headers},cacheKey:`GET ${url}`,retry});
+      const papers=result.recommendedPapers ?? [];
+      return {papers:papers.slice(offset,offset+limit).map(mapS2Paper),next:papers.length>offset+limit?offset+limit:undefined};
+    },
     async searchPapers(
       query: string,
       opts: { yearFrom?: number; yearTo?: number; venue?: string; limit: number; offset: number },
@@ -125,7 +134,7 @@ export function createS2Client(deps: S2Deps) {
       const year = opts.yearFrom || opts.yearTo ? `${opts.yearFrom ?? ""}-${opts.yearTo ?? ""}` : undefined;
       const res = await get<{ total?: number; data?: RawPaper[] }>("/paper/search", {
         query: query.replace(/-/g, " "),
-        fields: PAPER_FIELDS,
+        fields: `${PAPER_FIELDS},abstract`,
         year,
         venue: opts.venue,
         limit: opts.limit,

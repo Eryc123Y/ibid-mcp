@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { clearMemoryCache } from "../src/http/cache";
-import { RateLimitedError } from "../src/limiter/s2-limiter";
+import { RateLimitedError } from "../src/limiter/source-limiter";
 import { createOpenAlexClient } from "../src/sources/openalex";
 import { createS2Client } from "../src/sources/s2";
 import { coauthorship } from "../src/tools/authors";
@@ -141,8 +141,8 @@ describe("S2 rate-limit fallback", () => {
       { match: isS2("/paper/search"), respond: () => json({ total: 25, data: [s2Paper(5, "Mutation testing at scale", [["1", "A B"]], "10.5555/m")] }) },
     ]);
     const text = await searchPapers(context(mock), { query: "mutation testing", limit: 1, offset: 0 });
-    expect(text).toMatch(/^1 of 25 \(Semantic Scholar\)/);
-    expect(text).toMatch(/More: offset=1/);
+    expect(text.papers).toHaveLength(1);
+    expect(text.next_offset).toBe(1);
     expect(mock.calls[0]?.url.searchParams.get("fields")).toContain("externalIds");
   });
 

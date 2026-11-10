@@ -1,3 +1,4 @@
+import { limiter } from "../limiter/source-limiter";
 import type { AppEnv } from '../env';
 import { constantTimeEqual } from './crypto';
 import { pairingStore } from './pairing-store';
@@ -18,6 +19,6 @@ export async function admin(req: Request, env: AppEnv): Promise<Response> {
     await env.OAUTH_PROVIDER!.deleteClient(body.id);
     return json({revoked:body.id});
   }
-  if(path==='/admin/status' && req.method==='GET') return json({endpoint:`${env.PUBLIC_URL}/mcp`,sources:{s2:env.S2_API_KEY?'keyed':'slow',openalex:env.OPENALEX_API_KEY?'keyed':'keyless'},openalex_quota:null});
+  if(path==='/admin/status' && req.method==='GET') return json({endpoint:`${env.PUBLIC_URL}/mcp`,sources:{s2:env.S2_API_KEY?'keyed':'slow',openalex:env.OPENALEX_API_KEY?'keyed':'keyless'},openalex_quota:env.SOURCE_LIMITER ? await limiter(env,"openalex").status() : null});
   return json({error:'Not found'},404);
 }

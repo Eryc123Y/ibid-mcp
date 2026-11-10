@@ -10,6 +10,7 @@ export interface RetryOptions {
   /** Told about a 429 so a shared limiter can back off too. */
   readonly onThrottled?: (delayMs: number) => Promise<void>;
   readonly fetchImpl?: typeof fetch;
+  readonly random?: () => number;
   readonly sleep?: (ms: number) => Promise<void>;
 }
 
@@ -47,8 +48,9 @@ export async function fetchWithRetry(url: string, init: RequestInit, options: Re
       const response = await doFetch(url, init);
       if (!isRetryableStatus(response.status) || attempt === options.retries) return response;
       const hinted = retryAfterMs(response.headers.get("retry-after"));
-      const delay = Math.min(maxDelay, hinted ?? backoffMs(attempt, options.baseDelayMs, maxDelay));
+      const delay = hinted ?? Math.min(maxDelay, backoffMs(attempt, options.baseDelayMs, maxDelay) * (0.75 + (options.random ?? Math.random)() * 0.5));
       if (response.status === 429 && options.onThrottled) await options.onThrottled(delay);
+      if (delay > maxDelay) return response;
       await response.body?.cancel();
       await sleep(delay);
     } catch (error) {

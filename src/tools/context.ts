@@ -1,59 +1,26 @@
-/** Per-request tool context: backend clients plus a notice collector, and the S2→OpenAlex fallback. */
-
-import type { Notice } from "../core/types";
-import type { AppEnv } from "../env";
-import { HttpError } from "../http/json";
-import { acquireS2Slot, penalizeS2, RateLimitedError } from "../limiter/s2-limiter";
-import { budgetNotice, createOpenAlexClient, type OpenAlexClient } from "../sources/openalex";
-import { createS2Client, type S2Client } from "../sources/s2";
-
+import type { Notice } from '../core/types';
+import type { AppEnv } from '../env';
+import { sourceDeps, RateLimitedError } from '../limiter/source-limiter';
+import { budgetNotice, createOpenAlexClient, type OpenAlexClient } from '../sources/openalex';
+import { createS2Client, type S2Client } from '../sources/s2';
+import { track, failureReason, type SourceReport } from './provenance';
 export interface ToolContext {
-  readonly s2: S2Client;
-  readonly oa: OpenAlexClient;
-  readonly notices: Notice[];
+  readonly s2:S2Client;
+  readonly oa:OpenAlexClient;
+  readonly notices:Notice[];
+  readonly report?:SourceReport;
 }
-
-export function createToolContext(env: AppEnv): ToolContext {
-  return {
-    s2: createS2Client({
-      apiKey: env.S2_API_KEY || undefined,
-      acquire: () => acquireS2Slot(env),
-      penalize: (ms) => penalizeS2(env, ms),
-    }),
-    oa: createOpenAlexClient({ apiKey: env.OPENALEX_API_KEY || undefined }),
-    notices: [],
-  };
+export function createToolContext(env:AppEnv):ToolContext {
+  const report:SourceReport={sources_used:[],sources_skipped:[]};
+  return {s2:track(createS2Client({apiKey:env.S2_API_KEY || undefined,...sourceDeps(env,'s2')}),'s2',report),
+    oa:track(createOpenAlexClient({apiKey:env.OPENALEX_API_KEY || undefined,...sourceDeps(env,'openalex')}),'openalex',report),notices:[],report};
 }
-
-/** S2 failures that justify falling back to OpenAlex rather than failing the tool. */
-export function isS2Unavailable(error: unknown): boolean {
-  if (error instanceof RateLimitedError) return true;
-  return error instanceof HttpError && (error.status === 429 || error.status >= 500);
-}
-
-export function describeS2Failure(error: unknown): string {
-  return error instanceof RateLimitedError
-    ? "Semantic Scholar queue is full (1 req/s shared by all clients)"
-    : `Semantic Scholar unavailable (${error instanceof Error ? error.message : String(error)})`;
-}
-
-/** Run the S2 path; on rate limiting or outage, record a notice and run the OpenAlex path. */
-export async function withFallback<T>(
-  ctx: ToolContext,
-  primary: () => Promise<T>,
-  fallback: () => Promise<T>,
-): Promise<T> {
-  try {
-    return await primary();
-  } catch (error) {
-    if (!isS2Unavailable(error)) throw error;
-    ctx.notices.push({ level: "warn", text: `${describeS2Failure(error)}; fell back to OpenAlex. Retry later for S2 data.` });
+export function sourceReport(ctx:ToolContext):SourceReport {return ctx.report ?? {sources_used:[],sources_skipped:[]};}
+export async function withFallback<T>(ctx:ToolContext,primary:()=>Promise<T>,fallback:()=>Promise<T>):Promise<T> {
+  try{return await primary();}catch(error){
+    ctx.notices.push({level:'warn',text:`${error instanceof RateLimitedError?'Semantic Scholar queue is full':failureReason(error)} (source unavailable); fell back to OpenAlex.`});
     return fallback();
   }
 }
-
-/** Notices to print at the top of a tool result, including the OpenAlex budget warning. */
-export function collectNotices(ctx: ToolContext): Notice[] {
-  const budget = budgetNotice();
-  return budget ? [...ctx.notices, budget] : [...ctx.notices];
-}
+export async function optional<T>(operation:()=>Promise<T>,fallback:T):Promise<T> {try{return await operation();}catch{return fallback;}}
+export function collectNotices(ctx:ToolContext):Notice[] {const budget=budgetNotice();return budget?[...ctx.notices,budget]:[...ctx.notices];}

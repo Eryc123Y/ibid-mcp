@@ -23,15 +23,15 @@ export interface JsonRequest {
   readonly ttlSeconds?: number;
   readonly retry: RetryOptions;
   /** Inspect response headers (e.g. remaining budget) before the body is read. */
-  readonly onResponse?: (response: Response) => void;
+  readonly onResponse?: (response: Response) => void | Promise<void>;
 }
 
 export async function requestJson<T>(req: JsonRequest): Promise<T> {
   const load = async (): Promise<{ body: string; cacheable: boolean }> => {
     const response = await fetchWithRetry(req.url, req.init, req.retry);
-    req.onResponse?.(response);
+    await req.onResponse?.(response);
     const body = await response.text();
-    if (!response.ok) throw new HttpError(response.status, req.service, body);
+    if (!response.ok) throw new HttpError(response.status, req.service, "request failed");
     return { body, cacheable: true };
   };
   const body = req.cacheKey ? await cached(req.cacheKey, req.ttlSeconds ?? 600, load) : (await load()).body;

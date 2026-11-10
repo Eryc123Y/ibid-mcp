@@ -21,6 +21,9 @@ export interface OpenAlexDeps {
   readonly apiKey?: string;
   readonly mailto?: string;
   readonly fetchImpl?: typeof fetch;
+  readonly acquire?: () => Promise<void>;
+  readonly penalize?: (ms:number) => Promise<void>;
+  readonly onResponse?: (response:Response) => Promise<void>;
 }
 
 interface RawWork {
@@ -109,10 +112,10 @@ function mapAuthor(raw: RawAuthor): AuthorRecord {
   };
 }
 
-/** Warn when under 10% of the daily budget is left. */
+/** Warn when at or under 20% of the daily budget is left. */
 export function budgetNotice(): Notice | undefined {
   if (!lastBudget || lastBudget.limit <= 0) return undefined;
-  if (lastBudget.remaining >= lastBudget.limit * 0.1) return undefined;
+  if (lastBudget.remaining > lastBudget.limit * 0.2) return undefined;
   return {
     level: "warn",
     text: `OpenAlex daily budget low (${lastBudget.remaining}/${lastBudget.limit} credits left); fallbacks may fail until reset.`,
@@ -145,8 +148,8 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
       init: { headers: { accept: "application/json" } },
       cacheKey: `GET ${publicUrl}`, // never includes api_key
       ttlSeconds: TTL_SECONDS,
-      retry: { retries: 1, baseDelayMs: 1000, fetchImpl: deps.fetchImpl },
-      onResponse: (r) => recordBudget(r.headers),
+      retry: { retries: 1, baseDelayMs: 1000, fetchImpl: deps.fetchImpl, beforeAttempt:deps.acquire, onThrottled:deps.penalize },
+      onResponse: async (r) => {recordBudget(r.headers);await deps.onResponse?.(r);},
     });
   };
 
@@ -166,7 +169,7 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
         filter: filters.length > 0 ? filters.join(",") : undefined,
         per_page: opts.limit,
         page: opts.page,
-        select: WORK_SELECT,
+        select: `${WORK_SELECT},abstract_inverted_index`,
       });
       return { count: res.meta?.count ?? 0, papers: (res.results ?? []).map(mapWork) };
     },

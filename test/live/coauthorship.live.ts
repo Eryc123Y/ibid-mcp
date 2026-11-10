@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 import { INITIAL_STATE, intervalFor, reserve } from "../../src/limiter/schedule";
-import { RateLimitedError } from "../../src/limiter/s2-limiter";
+import { RateLimitedError } from "../../src/limiter/source-limiter";
 import { createOpenAlexClient } from "../../src/sources/openalex";
 import { createS2Client } from "../../src/sources/s2";
 import { coauthorship, getAuthor } from "../../src/tools/authors";

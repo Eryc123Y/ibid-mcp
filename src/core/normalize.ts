@@ -72,13 +72,13 @@ export function normalizeDoi(doi: string | undefined | null): string | undefined
 }
 
 /** All dedupe keys for a paper: its DOI, its arXiv id and its title. */
-export function paperKeys(paper: Pick<Paper, "doi" | "arxiv" | "title">): string[] {
+export function paperKeys(paper: Pick<Paper, "doi" | "arxiv" | "title" | "year">): string[] {
   const keys: string[] = [];
   const doi = normalizeDoi(paper.doi);
   if (doi) keys.push(`doi:${doi}`);
   if (paper.arxiv) keys.push(`arxiv:${paper.arxiv.toLowerCase().replace(/v\d+$/, "")}`);
   const t = titleKey(paper.title);
-  if (t.length >= 12) keys.push(`title:${t}`);
+  if (t.length >= 12) keys.push(`title:${t}:${paper.year ?? "unknown"}`);
   return keys;
 }
 

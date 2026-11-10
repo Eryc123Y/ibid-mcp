@@ -17,8 +17,8 @@
   "durable_objects": {
     "bindings": [
       {
-        "name": "S2_LIMITER",
-        "class_name": "S2RateLimiter"
+        "name": "SOURCE_LIMITER",
+        "class_name": "SourceLimiter"
       },
       {
         "name": "PAIRING_STORE",
@@ -30,7 +30,7 @@
     {
       "tag": "v1",
       "new_sqlite_classes": [
-        "S2RateLimiter",
+        "SourceLimiter",
         "PairingStore"
       ]
     }

@@ -8,7 +8,7 @@ import type { AppEnv } from "./env";
 import { buildServer } from "./tools/server";
 
 export { PairingStore } from "./auth/pairing-store";
-export { S2RateLimiter } from "./limiter/s2-limiter";
+export { SourceLimiter } from "./limiter/source-limiter";
 
 const MCP_ROUTE = "/mcp";
 

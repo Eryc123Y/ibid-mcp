@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { RateLimitedError, S2RateLimiter } from "../src/limiter/s2-limiter";
+import { RateLimitedError, SourceLimiter as S2RateLimiter } from "../src/limiter/source-limiter";
+import { memoryState } from "./helpers/storage";
 import {
   INITIAL_STATE,
   intervalFor,
@@ -52,7 +53,7 @@ describe("reserve (pure schedule)", () => {
 });
 
 describe("S2RateLimiter durable object", () => {
-  const make = (key?: string) => new S2RateLimiter({} as never, { S2_API_KEY: key } as never);
+  const make = (key?: string) => new S2RateLimiter(memoryState().state, { S2_API_KEY: key } as never);
 
   it("serialises concurrent callers into increasing waits", async () => {
     vi.useFakeTimers();
@@ -68,7 +69,7 @@ describe("S2RateLimiter durable object", () => {
     vi.setSystemTime(0);
     const limiter = make(undefined); // keyless: 3 s spacing
     const results = [];
-    for (let i = 0; i < 6; i += 1) results.push(await limiter.reserve(10_000));
+    for (let i = 0; i < 6; i += 1) results.push(await limiter.reserve("s2",10_000));
     expect(results.filter((r) => r.ok)).toHaveLength(4); // waits 0, 3, 6, 9 s
     expect(results[4]).toEqual({ ok: false, retryAfterMs: 12_000 });
     vi.useRealTimers();
@@ -84,6 +85,6 @@ describe("S2RateLimiter durable object", () => {
   });
 
   it("RateLimitedError tells the agent what happened", () => {
-    expect(new RateLimitedError(12_000).message).toMatch(/1 request\/s shared by all clients; queue ~12s/);
+    expect(new RateLimitedError(12_000).message).toMatch(/expected wait 12s/);
   });
 });

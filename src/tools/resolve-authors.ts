@@ -10,7 +10,7 @@ import { type AuthorCluster, mergeAuthors, recordKey } from "../core/merge";
 import { namesCompatible } from "../core/normalize";
 import type { AuthorRecord, Paper } from "../core/types";
 import { OR_BATCH_MAX } from "../sources/openalex";
-import { type ToolContext, withFallback } from "./context";
+import { type ToolContext, withFallback, optional } from "./context";
 
 export interface AuthorQuery {
   readonly input: string;
@@ -36,8 +36,8 @@ async function explicitRecords(ctx: ToolContext, queries: readonly AuthorQuery[]
 
   const [s2, oa, byOrcid] = await Promise.all([
     s2Ids.length > 0 ? withFallback(ctx, () => ctx.s2.authorBatch(s2Ids, true), async () => []) : [],
-    oaIds.length > 0 ? ctx.oa.authorsByIds("ids.openalex", oaIds) : [],
-    orcids.length > 0 ? ctx.oa.authorsByIds("orcid", orcids) : [],
+    oaIds.length > 0 ? optional(() => ctx.oa.authorsByIds("ids.openalex", oaIds), []) : [],
+    orcids.length > 0 ? optional(() => ctx.oa.authorsByIds("orcid", orcids), []) : [],
   ]);
   const out = new Map<number, AuthorRecord>();
   parsed.forEach((p, i) => {
@@ -83,7 +83,7 @@ export async function resolveAuthors(ctx: ToolContext, queries: readonly AuthorQ
     names.map(async (name) => {
       const [s2, oa] = await Promise.all([
         withFallback(ctx, () => ctx.s2.searchAuthors(name, S2_CANDIDATES, true), async () => []),
-        ctx.oa.searchAuthors(name, OA_CANDIDATES),
+        optional(() => ctx.oa.searchAuthors(name, OA_CANDIDATES), []),
       ]);
       return [...s2, ...oa.filter((r) => namesCompatible(name, r.name) || r.aliases.some((a) => namesCompatible(name, a)))];
     }),
@@ -92,7 +92,7 @@ export async function resolveAuthors(ctx: ToolContext, queries: readonly AuthorQ
   const oaIds = Array.from(
     new Set(perQuery.flat().concat(Array.from(explicit.values())).filter((r) => r.source === "openalex").map((r) => r.id)),
   ).slice(0, OR_BATCH_MAX);
-  const evidence = oaIds.length > 0 ? (await ctx.oa.worksByAuthors(oaIds, OA_WORKS_FOR_EVIDENCE, "recent")).papers : [];
+  const evidence = oaIds.length > 0 ? (await optional(() => ctx.oa.worksByAuthors(oaIds, OA_WORKS_FOR_EVIDENCE, "recent"), {papers:[],count:0})).papers : [];
 
   return queries.map((query, i) => {
     const pinned = explicit.get(i);

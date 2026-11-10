@@ -16,7 +16,7 @@ export type Reservation =
 export const INITIAL_STATE: LimiterState = { nextFreeAt: 0 };
 
 /** 1 req/s with the key, plus a margin for clock skew between us and S2. */
-export const KEYED_INTERVAL_MS = 1100;
+export const KEYED_INTERVAL_MS = 1000;
 /** Without a key we share S2's public pool; stay well below it. */
 export const KEYLESS_INTERVAL_MS = 3000;
 /** Longest a caller may queue before getting a "rate limited" answer instead. */

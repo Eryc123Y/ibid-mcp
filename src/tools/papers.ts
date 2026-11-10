@@ -3,9 +3,9 @@
 import { dedupePapers } from "../core/dedupe";
 import { paperDetail, paperLine } from "../core/format";
 import { IdParseError, type ParsedPaperId, parsePaperId } from "../core/ids";
-import { paperKeys } from "../core/normalize";
+import { titleKey, paperKeys } from "../core/normalize";
 import type { Paper } from "../core/types";
-import { type ToolContext, withFallback } from "./context";
+import { type ToolContext, withFallback, optional } from "./context";
 
 type OaFilter = { attr: "doi" | "ids.openalex" | "ids.pmid" | "ids.pmcid"; value: string };
 
@@ -27,44 +27,7 @@ function matchesId(paper: Paper, id: ParsedPaperId): boolean {
   }
 }
 
-export interface SearchArgs {
-  readonly query: string;
-  readonly year_from?: number;
-  readonly year_to?: number;
-  readonly venue?: string;
-  readonly limit: number;
-  readonly offset: number;
-}
-
-export async function searchPapers(ctx: ToolContext, args: SearchArgs): Promise<string> {
-  const result = await withFallback(
-    ctx,
-    async () => {
-      const r = await ctx.s2.searchPapers(args.query, {
-        yearFrom: args.year_from,
-        yearTo: args.year_to,
-        venue: args.venue,
-        limit: args.limit,
-        offset: args.offset,
-      });
-      return { ...r, source: "Semantic Scholar" };
-    },
-    async () => {
-      if (args.venue) ctx.notices.push({ level: "info", text: "venue filter is ignored in the OpenAlex fallback." });
-      const r = await ctx.oa.searchWorks(args.query, {
-        yearFrom: args.year_from,
-        yearTo: args.year_to,
-        limit: args.limit,
-        page: Math.floor(args.offset / args.limit) + 1,
-      });
-      return { total: r.count, papers: r.papers, source: "OpenAlex" };
-    },
-  );
-  if (result.papers.length === 0) return `No papers found for "${args.query}" (${result.source}).`;
-  const lines = result.papers.map((p, i) => paperLine(p, args.offset + i));
-  const next = args.offset + result.papers.length < result.total ? `\nMore: offset=${args.offset + result.papers.length}` : "";
-  return `${result.papers.length} of ${result.total} (${result.source}):\n${lines.join("\n")}${next}`;
-}
+export { searchPapers } from "./search";
 
 /** Resolve OpenAlex W-ids to DOIs so S2 can address them in the same batch. */
 async function s2AddressFor(ctx: ToolContext, parsed: readonly ParsedPaperId[]): Promise<Map<number, string>> {
@@ -81,7 +44,7 @@ async function s2AddressFor(ctx: ToolContext, parsed: readonly ParsedPaperId[]):
   return out;
 }
 
-export async function getPapers(ctx: ToolContext, ids: readonly string[], full: boolean): Promise<string> {
+async function getByIds(ctx: ToolContext, ids: readonly string[], full: boolean): Promise<string> {
   const errors: string[] = [];
   const parsed: ParsedPaperId[] = [];
   ids.forEach((raw) => {
@@ -115,7 +78,7 @@ export async function getPapers(ctx: ToolContext, ids: readonly string[], full: 
     const filter = found?.doi ? { attr: "doi" as const, value: found.doi } : oaFilterOf(p);
     return filter ? [{ i, filter }] : [];
   });
-  const oaWorks = wanted.length > 0 ? await ctx.oa.worksByIds(wanted.map((w) => w.filter), true) : [];
+  const oaWorks = wanted.length > 0 ? await optional(() => ctx.oa.worksByIds(wanted.map((w) => w.filter), true), []) : [];
 
   const blocks = parsed.map((p, i) => {
     const s2 = s2Results.get(i);
@@ -130,7 +93,7 @@ export async function getPapers(ctx: ToolContext, ids: readonly string[], full: 
 
 export interface LinksArgs {
   readonly id: string;
-  readonly direction: "citations" | "references";
+  readonly direction: "citations" | "references" | "recommendations";
   readonly limit: number;
   readonly offset: number;
 }
@@ -149,12 +112,17 @@ async function openAlexLinks(ctx: ToolContext, parsed: ParsedPaperId, args: Link
 
 export async function paperLinks(ctx: ToolContext, args: LinksArgs): Promise<string> {
   const parsed = parsePaperId(args.id);
+  if (args.direction === "recommendations") {
+    if (!parsed.s2) throw new Error("Recommendations require a DOI, arXiv or S2 id.");
+    const result = await ctx.s2.recommendations(parsed.s2,args.limit,args.offset);
+    return result.papers.map(paperLine).join("\n") + (result.next === undefined ? "" : `\nMore: offset=${result.next}`);
+  }
   const result = await withFallback(
     ctx,
     async () => {
       const address = (await s2AddressFor(ctx, [parsed])).get(0);
       if (!address) return { papers: await openAlexLinks(ctx, parsed, args), source: "OpenAlex", next: undefined };
-      const r = await ctx.s2.links(address, args.direction, args.limit, args.offset);
+      const r = await ctx.s2.links(address, args.direction as "citations" | "references", args.limit, args.offset);
       return { ...r, source: "Semantic Scholar" };
     },
     async () => ({ papers: await openAlexLinks(ctx, parsed, args), source: "OpenAlex", next: undefined }),
@@ -164,4 +132,19 @@ export async function paperLinks(ctx: ToolContext, args: LinksArgs): Promise<str
   const lines = result.papers.map((p, i) => paperLine(p, args.offset + i));
   const next = result.next !== undefined ? `\nMore: offset=${result.next}` : "";
   return `${label} ${args.id} (${result.source}, ${result.papers.length} shown):\n${lines.join("\n")}${next}`;
+}
+
+/** Titles are resolved conservatively: exact normalized title, not merely the first hit. */
+export async function getPapers(ctx:ToolContext, ids:readonly string[],full:boolean):Promise<string> {
+  if(ids.length<1 || ids.length>20)throw new Error('Provide between 1 and 20 papers.');
+  const identifiers:string[]=[];const titles:string[]=[];
+  for(const id of ids){try{parsePaperId(id);identifiers.push(id);}catch{titles.push(id);}}
+  const blocks=identifiers.length?[await getByIds(ctx,identifiers,full)]:[];
+  for(const title of titles){
+    const results=await withFallback(ctx,()=>ctx.s2.searchPapers(title,{limit:5,offset:0}),async()=>{const r=await ctx.oa.searchWorks(title,{limit:5,page:1});return {total:r.count,papers:r.papers};});
+    let match=results.papers.find(p=>titleKey(p.title)===titleKey(title));
+    if(!match){const oa=await optional(()=>ctx.oa.searchWorks(title,{limit:5,page:1}),{count:0,papers:[]});match=oa.papers.find(p=>titleKey(p.title)===titleKey(title));}
+    blocks.push(match?paperDetail(match,full):'Not found: '+title);
+  }
+  return blocks.join('\n\n');
 }

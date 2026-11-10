@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { backoffMs, fetchWithRetry, retryAfterMs } from "../src/http/fetch-retry";
-import { RateLimitedError } from "../src/limiter/s2-limiter";
+import { RateLimitedError } from "../src/limiter/source-limiter";
 
 const noSleep = async () => {};
 
@@ -56,4 +56,10 @@ describe("fetchWithRetry", () => {
     expect(backoffMs(0, 1000, 8000)).toBe(1000);
     expect(backoffMs(5, 1000, 8000)).toBe(8000);
   });
+});
+
+it('does not retry before a long Retry-After, and propagates the full penalty', async () => {
+ const onThrottled=vi.fn(async()=>{});const fetchImpl=vi.fn(async()=>new Response('busy',{status:429,headers:{'retry-after':'60'}}));
+ const response=await fetchWithRetry('https://x',{}, {retries:2,baseDelayMs:10,fetchImpl,onThrottled,sleep:noSleep});
+ expect(response.status).toBe(429);expect(fetchImpl).toHaveBeenCalledTimes(1);expect(onThrottled).toHaveBeenCalledWith(60000);
 });

@@ -39,8 +39,8 @@ describe("MCP protocol smoke", () => {
       method: "initialize",
       params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "smoke", version: "1" } },
     })) as { result: { serverInfo: { name: string }; instructions: string } };
-    expect(res.result.serverInfo.name).toBe("scholar");
-    expect(res.result.instructions).toMatch(/1 request\/second shared across ALL clients/);
+    expect(res.result.serverInfo.name).toBe("litscout");
+    expect(res.result.instructions).toMatch(/1 request every 3 seconds/);
     expect(res.result.instructions).toMatch(/alphaXiv/);
   });
 
@@ -49,7 +49,7 @@ describe("MCP protocol smoke", () => {
       result: { tools: Array<{ name: string; description: string; inputSchema: { properties: Record<string, unknown> } }> };
     };
     const names = res.result.tools.map((t) => t.name).sort();
-    expect(names).toEqual(["coauthorship", "get_author", "get_paper", "paper_links", "search_papers"]);
+    expect(names).toEqual(["coauthorship", "get_author", "get_paper", "paper_links", "search"]);
     const getPaper = res.result.tools.find((t) => t.name === "get_paper");
     expect(getPaper?.description).toMatch(/ONE call/);
     expect(Object.keys(getPaper?.inputSchema.properties ?? {})).toEqual(["ids", "full"]);
