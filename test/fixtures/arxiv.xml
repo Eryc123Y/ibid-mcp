@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+<opensearch:totalResults>1</opensearch:totalResults>
+<entry><id>http://arxiv.org/abs/2401.00001v2</id><published>2024-01-02T00:00:00Z</published><updated>2024-01-03T00:00:00Z</updated><title>Example &amp; synthetic
+ preprint</title><summary>A synthetic abstract.</summary><author><name>Alex Example</name></author><author><name>Sam Example</name></author><category term="cs.AI"/><arxiv:doi>10.1234/SYNTHETIC</arxiv:doi><link href="https://arxiv.org/pdf/2401.00001v2" title="pdf" type="application/pdf"/></entry>
+</feed>

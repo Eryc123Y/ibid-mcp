@@ -1,6 +1,6 @@
 /** Source-neutral shapes shared by the backends, the merge logic and the formatters. */
 
-export type Source = "s2" | "openalex";
+export type Source = "s2" | "openalex" | "arxiv" | "core";
 
 export interface AuthorRef {
   readonly name: string;
@@ -27,7 +27,7 @@ export interface Paper {
 }
 
 export interface AuthorRecord {
-  readonly source: Source;
+  readonly source: "s2" | "openalex";
   /** S2 author id or OpenAlex A-id. */
   readonly id: string;
   readonly name: string;

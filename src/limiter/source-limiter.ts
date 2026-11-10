@@ -29,6 +29,19 @@ export class SourceLimiter extends DurableObject<AppEnv> {
     await this.ctx.storage.put('budget',{remaining,limit,warning:remaining<=limit*0.2,observedAt:Date.now(),resetAt});
     if(remaining<=0)await this.penalize(resetAt?Math.max(0,resetAt-Date.now()):source==='openalex'?60_000:1000);
   }
+  /** Keep the entire connection in this object: reservation-only limiting could overlap slow responses. */
+  async arxivFetch(url:string):Promise<{body:string;status:number;headers:Record<string,string>}> {
+    const parsed=new URL(url);
+    if(parsed.origin!=='https://export.arxiv.org' || parsed.pathname!=='/api/query')throw new Error('Only the arXiv API is allowed');
+    return this.ctx.blockConcurrencyWhile(async()=>{
+      const slot=await this.reserve('arxiv');
+      if(!slot.ok)throw new RateLimitedError(slot.retryAfterMs,'arxiv');
+      if(slot.waitMs)await new Promise(resolve=>setTimeout(resolve,slot.waitMs));
+      const response=await fetch(url,{signal:AbortSignal.timeout(12000)});
+      const body=await response.text();
+      return {body,status:response.status,headers:Object.fromEntries(response.headers)};
+    });
+  }
   async status():Promise<Budget|null> {return await this.ctx.storage.get<Budget>('budget') ?? null;}
 }
 export class RateLimitedError extends Error {

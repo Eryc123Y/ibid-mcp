@@ -18,5 +18,7 @@ export function memoryState() {
       return next;
     },
   };
-  return { state: { storage } as unknown as DurableObjectState, data };
+  let blocked = Promise.resolve();
+  const blockConcurrencyWhile = <T>(fn: () => Promise<T>): Promise<T> => { const next = blocked.then(fn); blocked = next.then(() => {}, () => {}); return next; };
+  return { state: { storage, blockConcurrencyWhile } as unknown as DurableObjectState, data };
 }

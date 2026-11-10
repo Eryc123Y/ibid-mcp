@@ -45,7 +45,7 @@ export function buildServer(env: AppEnv): McpServer {
       title: "Search papers",
       description: TOOL_DESCRIPTIONS.search_papers,
       inputSchema: z.object({
-        query: z.string().min(2).max(300).describe("Keywords or a title"),
+        query: z.string().max(300).default("").describe("Keywords or a title"),
         recent: z.boolean().default(false),
         category: z.string().max(60).optional(),
         open_access: z.boolean().default(false),

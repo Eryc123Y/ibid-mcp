@@ -27,3 +27,9 @@
 - Replaced the S2-only object with SourceLimiter instances named by source. Search combines S2 and OpenAlex, fills missing metadata, and trims abstracts to 300 characters. Every executed tool reports source successes/failures; upstream error bodies are not returned.
 - Long Retry-After values now postpone the shared source instead of retrying prematurely; bounded retries use jitter. Added title lookup and recommendation pagination required by the seven-tool specification.
 - Validation: 98 tests, typecheck, lint and bundle build passed. No upstream API calls.
+
+## P3b
+
+- Tests first covered Atom parsing, category-only queries, empty/error feeds, and concurrent slow connections. Implemented arXiv search for recent/category requests with IDs, DOI, dates, authors and abstract.
+- The arXiv connection itself runs inside a serialized Durable Object operation, preventing overlap even when a response takes longer than three seconds.
+- Validation: 101 tests, typecheck, lint and bundle build passed; documentation was read, no arXiv API request was made.

@@ -92,3 +92,11 @@ partial results are always marked as such.
 - LitScout sends no contact email upstream by default. The OpenAlex `mailto` is opt-in.
 - Keys are stored only as Worker secrets in the user's own account.
 - The server keeps no query logs beyond Cloudflare's default request metrics.
+
+## Source implementation notes (v0.1)
+
+arXiv uses the documented [Atom API](https://info.arxiv.org/help/api/user-manual.html)
+and [API terms](https://info.arxiv.org/help/api/tou.html). Requests are serialized
+inside its SourceLimiter object, with at least three seconds between starts and
+a bounded connection timeout. No PDF/full-text scraping is used. Tests use a
+small synthetic Atom response matching the documented schema.

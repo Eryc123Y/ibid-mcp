@@ -6,6 +6,6 @@ export function paper(source: Source, id: string, title: string, authors: string
   return { source, id, title, authors: authors.map((name) => ({ name })), ...extra };
 }
 
-export function author(source: Source, id: string, name: string, extra: Partial<AuthorRecord> = {}): AuthorRecord {
+export function author(source: AuthorRecord["source"], id: string, name: string, extra: Partial<AuthorRecord> = {}): AuthorRecord {
   return { source, id, name, aliases: [], affiliations: [], papers: [], ...extra };
 }
