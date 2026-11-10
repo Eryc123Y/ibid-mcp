@@ -1,0 +1,10 @@
+{
+  "name": "litscout",
+  "main": "WORKER_BUNDLE_PATH",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": { "PUBLIC_URL": "https://YOUR_WORKER_HOST" },
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "KV_NAMESPACE_ID" }],
+  "durable_objects": { "bindings": [{ "name": "S2_LIMITER", "class_name": "S2RateLimiter" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["S2RateLimiter"] }]
+}

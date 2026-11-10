@@ -24,7 +24,7 @@ A scholarly-search MCP server that each researcher deploys to their own free Clo
 
 ## Why arXiv alone is not enough
 
-Measured on 600 random 2024 papers from 15 venues ([daily-arXiv measurement](https://github.com/Eryc123Y/daily-arXiv-ai-enhanced/blob/main/docs/measurements/arxiv-coverage.md)): 62-85% of NeurIPS, CVPR and ICCV papers are on arXiv, but only 38-50% of IEEE TPAMI, TIP and ACM TOG, 28-30% of ICASSP, ICIP and IEEE TVCG, 8-10% of IEEE TCSVT and Elsevier's ML journals, and none of Journal of Vision. A tool that reads arXiv well still misses most journal work, which is where much of applied vision, graphics and perception research appears.
+Measured on 600 random 2024 papers from 15 venues ([daily-arXiv measurement](https://github.com/search?q=daily-arXiv-ai-enhanced&type=repositories)): 62-85% of NeurIPS, CVPR and ICCV papers are on arXiv, but only 38-50% of IEEE TPAMI, TIP and ACM TOG, 28-30% of ICASSP, ICIP and IEEE TVCG, 8-10% of IEEE TCSVT and Elsevier's ML journals, and none of Journal of Vision. A tool that reads arXiv well still misses most journal work, which is where much of applied vision, graphics and perception research appears.
 
 ## The market (2026-11-04)
 
@@ -73,7 +73,7 @@ Ranked by ICE (impact, confidence, ease; 1-10 each).
 |---|---|---|---|---|---|
 | v0.1 | As in ROADMAP.md P0-P4 (bring in the prototype, pairing-code auth, CLI, per-source limiter, arXiv, OpenReview, CORE, venue table, release) | 9 | 8 | 4 | 2.9 |
 | v0.1 | Coverage eval in CI (the venue sample above as a fixture) | 6 | 8 | 7 | 3.4 |
-| v0.2 | `watch`: new papers since a date for saved topics, authors or venues; [daily-arXiv](https://github.com/Eryc123Y/daily-arXiv-ai-enhanced) reads it | 8 | 7 | 6 | 3.4 |
+| v0.2 | `watch`: new papers since a date for saved topics, authors or venues; [daily-arXiv](https://github.com/search?q=daily-arXiv-ai-enhanced&type=repositories) reads it | 8 | 7 | 6 | 3.4 |
 | v0.2 | Crossref as a fallback for DOI-only journal works that Semantic Scholar and OpenAlex miss | 5 | 7 | 7 | 2.5 |
 | v0.2 | DBLP pack, Europe PMC (already planned) | 5 | 7 | 5 | 1.8 |
 | v0.3 | Publisher full text with the user's own entitlements: Elsevier (ScienceDirect, Scopus), IEEE Xplore, Springer Nature; only after each provider's text-and-data-mining terms are checked and allow it; text returned to the agent, never stored | 7 | 4 | 3 | 0.8 |

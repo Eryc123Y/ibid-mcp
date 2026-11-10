@@ -1,12 +1,54 @@
 {
   "name": "litscout",
-  "version": "0.0.1",
-  "description": "Self-hosted MCP server for scholarly literature search across Semantic Scholar, OpenAlex, arXiv, OpenReview and CORE. Pre-alpha placeholder; not functional yet.",
-  "keywords": ["mcp", "model-context-protocol", "semantic-scholar", "openalex", "arxiv", "openreview", "literature-search", "cloudflare-workers"],
+  "version": "0.1.0",
+  "description": "Self-hosted scholarly literature MCP server.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "semantic-scholar",
+    "openalex",
+    "arxiv",
+    "openreview",
+    "literature-search",
+    "cloudflare-workers"
+  ],
   "license": "MIT",
-  "author": "Yang Xingyu (https://github.com/Eryc123Y)",
-  "repository": { "type": "git", "url": "git+https://github.com/Eryc123Y/litscout-mcp.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/litscout-mcp.git"
+  },
   "homepage": "https://github.com/Eryc123Y/litscout-mcp#readme",
-  "bugs": { "url": "https://github.com/Eryc123Y/litscout-mcp/issues" },
-  "files": ["README.md", "LICENSE"]
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/litscout-mcp/issues"
+  },
+  "files": [
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test:live": "vitest run --config vitest.live.config.ts"
+  },
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "1.2.3",
+    "@modelcontextprotocol/client": "2.3.1",
+    "@modelcontextprotocol/server": "2.3.1",
+    "agents": "0.28.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "latest",
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "5.0.3",
+    "esbuild": "^0.28.0",
+    "eslint": "^9.39.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "5.0.3",
+    "wrangler": "4.151.0"
+  }
 }
