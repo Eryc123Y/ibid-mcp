@@ -118,3 +118,13 @@
   the literal (32). No runtime behavior changed.
 - Before commit: all seven prescribed checks passed (168 tests), all coverage
   metrics above 80%, identifier scan and diff whitespace check clean.
+
+## Round 2 — collector follow-up
+
+- Final review found that a new-day resume initially assumed a fresh shared-IP
+  balance. Added a free singleton quota probe before any charged request and
+  refuse collection if quota headers are missing or invalid.
+- Added a failing invented regression, implemented the probe, then observed it
+  pass. Re-ran the recorded-availability stop: zero new live requests.
+- Before commit: all seven prescribed checks passed (169 tests), four coverage
+  metrics above 80%, identifier scan and diff whitespace check clean.

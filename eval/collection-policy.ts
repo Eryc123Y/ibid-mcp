@@ -34,3 +34,28 @@ export function validateVenueDraw(
       "Expected 40 unique titled papers in the specified year; preserve this draw for inspection",
     );
 }
+/** Singleton lookups are free; check the shared-IP balance before paid requests. */
+export async function probeBudget(
+  fetchImpl: typeof fetch,
+): Promise<{ limit: number; remaining: number }> {
+  const response = await fetchImpl(
+    "https://api.openalex.org/works/W2741809807?select=id",
+  );
+  await response.body?.cancel();
+  if (!response.ok)
+    throw new Error(`OpenAlex quota probe returned HTTP ${response.status}`);
+  const h = response.headers;
+  const limit = Number(h.get("x-ratelimit-limit"));
+  const remaining = Number(h.get("x-ratelimit-remaining"));
+  if (
+    !h.has("x-ratelimit-remaining") ||
+    !Number.isFinite(remaining) ||
+    remaining < 0 ||
+    !Number.isFinite(limit) ||
+    limit <= 0
+  )
+    throw new Error(
+      "OpenAlex quota headers missing or invalid; refuse paid collection",
+    );
+  return { limit, remaining };
+}

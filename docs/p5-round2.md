@@ -100,3 +100,9 @@ scrubbed snapshot if it is below approximately 5 MB; otherwise retain it here.
 Validation so far covers budget boundaries, source selection and draw rejection
 with invented data, plus the real recorded quota-stop path. The successful live
 end-to-end collection path remains unexercised because of quota.
+
+A follow-up check added a free single-work quota probe before paid collection.
+A later UTC day no longer assumes that the shared IP's full daily allowance is
+available. Missing or invalid quota headers stop collection. This path has an
+invented offline regression; the captured long Retry-After still stops this run
+before even that free request.

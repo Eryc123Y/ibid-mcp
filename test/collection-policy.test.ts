@@ -36,3 +36,23 @@ it("rejects incomplete or duplicate venue samples without silently replacing pap
   ).toThrow();
   expect(() => validateVenueDraw(papers, 2023)).toThrow();
 });
+it("reads a free quota probe and refuses unknown budget headers", async () => {
+  const { probeBudget } = await import("../eval/collection-policy");
+  const urls: string[] = [];
+  const budget = await probeBudget(async (input) => {
+    urls.push(String(input));
+    return new Response("{}", {
+      headers: { "x-ratelimit-limit": "1000", "x-ratelimit-remaining": "205" },
+    });
+  });
+  expect(budget).toEqual({ limit: 1000, remaining: 205 });
+  expect(urls).toEqual([
+    "https://api.openalex.org/works/W2741809807?select=id",
+  ]);
+  await expect(probeBudget(async () => new Response("{}"))).rejects.toThrow(
+    "quota",
+  );
+  await expect(
+    probeBudget(async () => new Response("{}", { status: 429 })),
+  ).rejects.toThrow("429");
+});

@@ -7,7 +7,12 @@ import { join } from "node:path";
 import { createS2Client } from "../src/sources/s2";
 import { createOpenAlexClient } from "../src/sources/openalex";
 import { HttpError } from "../src/http/json";
-import { creditRoom, sourceFor, validateVenueDraw } from "./collection-policy";
+import {
+  creditRoom,
+  sourceFor,
+  validateVenueDraw,
+  probeBudget,
+} from "./collection-policy";
 import { validateSample } from "./coverage";
 import type { CoverageSnapshot, RecordedResponse } from "./replay";
 
@@ -150,7 +155,11 @@ export async function collect(availability?: {
       throw new Error("Unexpected API host");
     if (["api_key", "mailto"].some((k) => url.searchParams.has(k)))
       throw new Error("Keyless collection only");
-    const cost = url.searchParams.has("search") ? 10 : 1;
+    const cost = /^\/works\/[^/]+$/.test(url.pathname)
+      ? 0
+      : url.searchParams.has("search")
+        ? 10
+        : 1;
     if (
       source === "openalex" &&
       (state.blockedUntil > Date.now() ||
@@ -184,6 +193,8 @@ export async function collect(availability?: {
     await checkpoint();
     return response;
   };
+  Object.assign(state, await probeBudget(get));
+  await checkpoint();
   for (const [venue, name, fixed] of venues) {
     if (state.draws[venue]) continue;
     if (!state.sources[venue]) {
