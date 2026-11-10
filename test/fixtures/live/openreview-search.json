@@ -1,0 +1,59 @@
+{
+  "recorded_at": "2026-11-10T18:22:22.050Z",
+  "url": "https://api2.openreview.net/notes/search?term=Direct+Preference+Optimization&content=all&source=forum&limit=2",
+  "status": 200,
+  "headers": {
+    "x-ratelimit-limit": "20",
+    "x-ratelimit-remaining": "19",
+    "x-ratelimit-reset": "1794335002"
+  },
+  "body": {
+    "count": 10000,
+    "notes": [
+      {
+        "id": "ljNZyrAlaa",
+        "forum": "ljNZyrAlaa",
+        "invitations": [
+          "ICML.cc/2026/Conference/-/Submission",
+          "ICML.cc/2026/Conference/-/Post_Submission",
+          "ICML.cc/2026/Conference/Submission30207/-/Full_Submission",
+          "ICML.cc/2026/Conference/-/Edit",
+          "ICML.cc/2026/Conference/Submission30207/-/Camera_Ready_Revision"
+        ],
+        "content": {
+          "venue": {
+            "value": "ICML 2026 regular"
+          },
+          "title": {
+            "value": "Distributed Direct Preference Optimization"
+          },
+          "venueid": {
+            "value": "ICML.cc/2026/Conference"
+          }
+        }
+      },
+      {
+        "id": "DmeFAFUO6f",
+        "forum": "DmeFAFUO6f",
+        "invitations": [
+          "ICML.cc/2026/Conference/-/Submission",
+          "ICML.cc/2026/Conference/-/Post_Submission",
+          "ICML.cc/2026/Conference/Submission27129/-/Full_Submission",
+          "ICML.cc/2026/Conference/-/Edit",
+          "ICML.cc/2026/Conference/Submission27129/-/Camera_Ready_Revision"
+        ],
+        "content": {
+          "venue": {
+            "value": "ICML 2026 regular"
+          },
+          "title": {
+            "value": "Autoregressive Direct Preference Optimization"
+          },
+          "venueid": {
+            "value": "ICML.cc/2026/Conference"
+          }
+        }
+      }
+    ]
+  }
+}

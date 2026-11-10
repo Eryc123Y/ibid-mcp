@@ -1,0 +1,18 @@
+{
+  "recorded_at": "2026-11-10T18:22:05.136Z",
+  "url": "https://api.openalex.org/works?search=Attention+Is+All+You+Need&per_page=2&select=id,doi,display_name,publication_year,primary_location,authorships,cited_by_count,open_access",
+  "status": 429,
+  "headers": {
+    "retry-after": "20275",
+    "x-ratelimit-cost-required-usd": "0.001",
+    "x-ratelimit-credits-required": "10",
+    "x-ratelimit-limit": "1000",
+    "x-ratelimit-limit-usd": "0.1",
+    "x-ratelimit-onetime-remaining": "0",
+    "x-ratelimit-prepaid-remaining-usd": "0",
+    "x-ratelimit-remaining": "0",
+    "x-ratelimit-remaining-usd": "0",
+    "x-ratelimit-reset": "20275"
+  },
+  "body": {}
+}

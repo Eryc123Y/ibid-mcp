@@ -1,0 +1,11 @@
+{
+  "recorded_at": "2026-11-10T18:22:25.382Z",
+  "url": "https://api2.openreview.net/notes?forum=HPuSIXJaa9&limit=100&offset=0",
+  "status": 403,
+  "headers": {
+    "x-ratelimit-limit": "180",
+    "x-ratelimit-remaining": "178",
+    "x-ratelimit-reset": "1794335002"
+  },
+  "body": {}
+}

@@ -1,0 +1,10 @@
+{
+  "recorded_at": "2026-11-10T18:22:56.864Z",
+  "url": "https://api.semanticscholar.org/graph/v1/author/search?query=Geoffrey+Hinton&limit=1&fields=name,affiliations,paperCount,citationCount,hIndex,externalIds",
+  "status": 429,
+  "headers": {},
+  "body": {
+    "message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+    "code": "429"
+  }
+}

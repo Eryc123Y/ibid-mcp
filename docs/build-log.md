@@ -68,3 +68,17 @@
 - Validation: 154 tests passed; statements 93.56%, branches 83.25%, functions 95.37%, lines 94.59%. Strict typecheck, lint, format check, build and local workerd smoke passed. The smoke blocks all outbound network requests.
 - Package dry-run contained only seven expected runtime/documentation files (approximately 331 KB packed); no fixtures, credentials, generated account configuration or real ranking table. Official venue documents used for local inspection were removed after the check.
 - CI was configured but not run on GitHub. No login, deployment, publishing, push or live upstream test occurred.
+
+## Round 2 — item 1
+
+- Recorded 4 S2, 3 OpenAlex, 2 arXiv and 3 OpenReview requests, plus one
+  unauthenticated OpenAlex quota-status read. No CORE calls. All requests were
+  sequential; S2/arXiv starts were at least 3.1 seconds apart.
+- Added eight offline regression cases. Real S2 reference and arXiv Atom shapes
+  pass unchanged; recorded throttles/challenges remain visible errors.
+- OpenAlex was already at 0/1,000 daily credits; the initial collector mistakenly
+  made two additional probes after its long Retry-After. Stopped all further
+  OpenAlex reads. OpenReview forum access requires a challenge; did not bypass it.
+- Validation before commit: all seven prescribed checks passed (162 tests);
+  personal-identifier scan and diff whitespace check passed. Detailed live
+  findings and scrub scope are in test/fixtures/live/README.md.
