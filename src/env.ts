@@ -4,6 +4,8 @@ import type { OAuthHelpers } from "@cloudflare/workers-oauth-provider";
 import type { S2RateLimiter } from "./limiter/s2-limiter";
 
 export interface AppEnv {
+  readonly PAIRING_STORE: DurableObjectNamespace<import("./auth/pairing-store").PairingStore>;
+  readonly MGMT_TOKEN?: string;
   readonly OAUTH_KV: KVNamespace;
   readonly S2_LIMITER: DurableObjectNamespace<S2RateLimiter>;
   /** Injected by OAuthProvider into the default handler. */

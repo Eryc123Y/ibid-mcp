@@ -2,16 +2,20 @@
 
 import { OAuthProvider } from "@cloudflare/workers-oauth-provider";
 import { createMcpHandler } from "agents/mcp/server";
+import { pairingStore } from "./auth/pairing-store";
 import { authHandler } from "./auth/handler";
 import type { AppEnv } from "./env";
 import { buildServer } from "./tools/server";
 
+export { PairingStore } from "./auth/pairing-store";
 export { S2RateLimiter } from "./limiter/s2-limiter";
 
 const MCP_ROUTE = "/mcp";
 
 const mcpApiHandler: { fetch: ExportedHandlerFetchHandler<AppEnv> } = {
   async fetch(request, env, ctx) {
+    const authorizationId = (ctx as ExecutionContext & { props?: { authorizationId?: string } }).props?.authorizationId;
+    if (!authorizationId || !(await pairingStore(env).isActive(authorizationId))) return new Response("Forbidden", { status: 403 });
     const handler = createMcpHandler(() => buildServer(env), { route: MCP_ROUTE });
     return handler(request as Request, env, ctx);
   },

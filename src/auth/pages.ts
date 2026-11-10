@@ -31,7 +31,8 @@ ${loopback}
 <p>Enter the pairing code from the CLI.</p>
 <form method="post">
 <input type="hidden" name="handle" value="${escapeHtml(handle)}">
-<button name="decision" value="approve">Allow</button><button name="decision" value="deny">Deny</button>
+<label>Pairing code <input name="code" autocomplete="one-time-code" maxlength="8" required></label>
+<button name="decision" value="approve">Allow</button><button name="decision" value="deny" formnovalidate>Deny</button>
 </form>`,
   );
 }
@@ -39,6 +40,6 @@ ${loopback}
 export function messagePage(title: string, message: string, status: number): Response {
   return new Response(page(title, `<h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p>`), {
     status,
-    headers: { "content-type": "text/html; charset=utf-8", "x-frame-options": "DENY" },
+    headers: { "content-type": "text/html; charset=utf-8", "x-frame-options": "DENY", "cache-control": "no-store" },
   });
 }
