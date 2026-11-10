@@ -82,3 +82,18 @@
 - Validation before commit: all seven prescribed checks passed (162 tests);
   personal-identifier scan and diff whitespace check passed. Detailed live
   findings and scrub scope are in test/fixtures/live/README.md.
+
+## Round 2 — item 2
+
+- Read the three reference measurement files, verified current OpenAlex search
+  pricing (10 credits; keyless 1,000/day), and honored the captured zero balance
+  and Retry-After without another live request. All 600 samples remain missing.
+- Added an opt-in resumable recorder, exact source/draw selection, original arXiv
+  verifier execution with HTTPS, actual adapter query/retry capture and strict
+  budget checks. Three invented policy tests failed before the helper existed,
+  then passed. The successful live path remains unexercised.
+- Ran the unchanged offline evaluator on the incomplete checkpoint: rejected
+  with `Expected 600 sampled papers` (exit 1), no empirical score. No matcher or
+  evaluator changes. Per-venue shortfall and reproduction steps: p5-round2.md.
+- Before commit: all seven prescribed checks passed (165 tests); four code
+  coverage metrics above 80%, identifier scan and whitespace checks clean.

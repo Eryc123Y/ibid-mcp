@@ -39,3 +39,8 @@ retries. Preserve missing matches and unsuccessful responses. Strip API keys,
 contact addresses and personal account details before committing a snapshot.
 The maintainer must supply the original sample and a lawful recorded search
 snapshot before the release gate can pass.
+
+Round 2 adds an opt-in resumable collector: `node scripts/record-p5.mjs --record`.
+Read [the collection receipt](../docs/p5-round2.md) first for quota, provenance,
+local checkpoint paths and the current shortfall. The recorded live quota was
+already exhausted, so the 600-paper acceptance result remains unverified.
