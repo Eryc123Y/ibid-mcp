@@ -13,3 +13,10 @@
 - Added failing tests for pairing persistence, concurrent consumption, expiry, attempt exhaustion, admin credentials, escaped consent and OAuth completion, then implemented them.
 - Pairing and immediate client revocation live in a transactional Durable Object. WebCrypto HMAC verification compares secrets; only pairing hashes persist. Browser-bound OAuth consent is checked before consuming attempts, and remembered consent is signed but never bypasses pairing.
 - Validation: 84 tests, strict typecheck and ESLint. OAuth provider dependencies run locally with a Durable Object base-class double; no account operations.
+
+## P2
+
+- Wrote six CLI tests first (missing module failure), then implemented deploy, pair, clients, revoke, status, keys and destroy with an injected Wrangler runner.
+- Deployment state/config use mode 0600 in a mode-0700 directory. Source secrets exist only in temporary mode-0600 files, cleaned even after upload failure. Incomplete deployment state is retained for retry; destroy requires an explicit typed confirmation.
+- Built the Worker and executable CLI with esbuild and verified the built CLI help. All Wrangler commands, including login/deploy/delete, were mocked; none were executed.
+- Validation: 90 tests, strict typecheck, ESLint and local bundle build passed.

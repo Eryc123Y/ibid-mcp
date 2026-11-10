@@ -22,8 +22,11 @@
     "url": "https://github.com/Eryc123Y/litscout-mcp/issues"
   },
   "files": [
+    "dist",
+    "wrangler.template.jsonc",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs/venue-data-licence.md"
   ],
   "type": "module",
   "scripts": {
@@ -31,14 +34,17 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test:live": "vitest run --config vitest.live.config.ts"
+    "test:live": "vitest run --config vitest.live.config.ts",
+    "build": "node scripts/build.mjs",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "1.2.3",
     "@modelcontextprotocol/client": "2.3.1",
     "@modelcontextprotocol/server": "2.3.1",
     "agents": "0.28.1",
-    "zod": "4.6.7"
+    "zod": "4.6.7",
+    "wrangler": "4.151.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "latest",
@@ -48,7 +54,12 @@
     "eslint": "^9.39.0",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.46.0",
-    "vitest": "5.0.3",
-    "wrangler": "4.151.0"
+    "vitest": "5.0.3"
+  },
+  "bin": {
+    "litscout": "dist/cli/index.js"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
