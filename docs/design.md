@@ -113,3 +113,8 @@ underlying content. LitScout returns repository links and at most 300 characters
 labels abstract versus full-text snippets, and does not cache fullText responses.
 The v3 documentation endpoint was inaccessible during this build; live response
 compatibility remains a maintainer smoke-check item.
+
+Venue ranks are downloaded at deployment time, never bundled. See the
+[licence review](venue-data-licence.md). The downloader reads CCF's official PDF
+and ICORE's explicit CSV export; it does not query DBLP. Missing DBLP keys remain
+unknown. Download failures are visible in CLI output and venue responses.

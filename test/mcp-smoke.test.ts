@@ -44,12 +44,12 @@ describe("MCP protocol smoke", () => {
     expect(res.result.instructions).toMatch(/alphaXiv/);
   });
 
-  it("tools/list exposes exactly the six tools", async () => {
+  it("tools/list exposes exactly the seven tools", async () => {
     const res = (await rpc({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} })) as {
       result: { tools: Array<{ name: string; description: string; inputSchema: { properties: Record<string, unknown> } }> };
     };
     const names = res.result.tools.map((t) => t.name).sort();
-    expect(names).toEqual(["coauthorship", "get_author", "get_paper", "paper_links", "reviews", "search"]);
+    expect(names).toEqual(["coauthorship", "get_author", "get_paper", "paper_links", "reviews", "search", "venue"]);
     const getPaper = res.result.tools.find((t) => t.name === "get_paper");
     expect(getPaper?.description).toMatch(/ONE call/);
     expect(Object.keys(getPaper?.inputSchema.properties ?? {})).toEqual(["ids", "full"]);

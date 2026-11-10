@@ -14,7 +14,7 @@ async function setup() {
     return 'Authenticated';
   });
   const output:string[]=[];
-  const deps:CliDeps={dir, bundlePath:path.resolve('dist/worker.js'), run,
+  const deps:CliDeps={fetchVenues:vi.fn(async()=>({downloaded_at:"2026-11-11",venues:[]})),dir, bundlePath:path.resolve('dist/worker.js'), run,
     prompt:vi.fn(async(label)=>label.includes('Delete')?'yes':label.includes('name')?'litscout':'synthetic-secret'),
     fetch:vi.fn(async()=>Response.json({code:'ABCD2345',clients:[],endpoint:'https://litscout.example/mcp'})),
     print:text=>{output.push(text);},};

@@ -1,3 +1,4 @@
+import {venue} from "./venue";
 /** Builds the MCP server and registers the five tools. */
 
 import { McpServer } from "@modelcontextprotocol/server";
@@ -127,5 +128,6 @@ export function buildServer(env: AppEnv): McpServer {
 
   server.registerTool("reviews", {title:"Public peer reviews",description:"Find OpenReview reviews by title, forum ID/URL or arXiv ID. Returns venue, decision, reviewer rating mean and population standard deviation, and short summaries.",inputSchema:z.object({query:z.string().min(2).max(500),full:z.boolean().default(false)}),annotations:{readOnlyHint:true,openWorldHint:true}},async(args)=>run(env,ctx=>ctx.openreview!.reviews(args.query,args.full)));
 
+  server.registerTool("venue", {title:"Venue rankings",description:"Look up a venue name or acronym; returns CCF/ICORE ranks with source and edition year, DBLP stream key when known, and fuzzy matches.",inputSchema:z.object({query:z.string().min(2).max(300)}),annotations:{readOnlyHint:true,openWorldHint:false}},async(args)=>run(env,ctx=>venue(env,ctx,args.query)));
   return server;
 }

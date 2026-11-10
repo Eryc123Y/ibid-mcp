@@ -1,8 +1,10 @@
+import type {VenueTable} from "../src/sources/venue";
 import { mkdtemp, rm } from 'node:fs/promises';
 import path from 'node:path';
 import template from './worker-template.json' with { type: 'json' };
 import { privateJson, readState, secureDir, type LocalState } from './state';
 export interface CliDeps {
+  fetchVenues:()=>Promise<VenueTable>;
   dir: string;
   bundlePath: string;
   run: (args:readonly string[])=>Promise<string>;
@@ -50,6 +52,10 @@ async function deploy(deps:CliDeps):Promise<void> {
     state={...state,namespaceId};await privateJson(path.join(deps.dir,'state.json'),state);
   }
   await writeConfig(deps,state);
+  try {
+    const table=await deps.fetchVenues();const file=path.join(deps.dir,"venues.json");await privateJson(file,table);
+    await deps.run(["kv","key","put","litscout:venues","--path",file,"--namespace-id",state.namespaceId!,"--remote"]);
+  } catch {deps.print("Venue tables could not be downloaded or uploaded. Search remains available; rerun deploy to retry.");}
   // Keep source keys only in the short-lived private upload file.
   await upload(deps,{...await sourceKeys(deps),MGMT_TOKEN:state.token,...(state.consentSecret?{CONSENT_SECRET:state.consentSecret}:{})});
   const output=await deps.run(['deploy','--config',configPath(deps)]);

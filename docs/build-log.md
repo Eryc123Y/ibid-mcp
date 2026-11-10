@@ -45,3 +45,10 @@
 - Added failing tests for CORE authorization, keyless skip, unrelated-hit rejection and search/get_paper integration, then implemented the adapter.
 - get_paper now returns structured paper rows with an oa block. CORE snippets are bounded and identify whether they come from full text or an abstract. No full-text response caching or PDF downloading occurs.
 - Validation: 109 tests, typecheck, lint and bundle build passed. CORE documentation endpoint returned 403; fixtures model the documented v3 fields, with live compatibility explicitly unverified.
+
+## P3e
+
+- Read CCF's official copyright/directory notice and ICORE's four-page public usage guidance. No clear redistribution grant was found; recorded links and the conservative decision in venue-data-licence.md.
+- Added failing tests for exact/fuzzy lookup, rank provenance, CSV/PDF parsing and download integration. Added the seventh tool and a deploy-time downloader; only synthetic rank records are tracked.
+- Inspected official documents outside tests: local parsing extracted 558 CCF rows (552 with DBLP links) and 987 ICORE rows. These downloads and parsed data remain ignored local inspection artifacts, not package contents. PDF extraction of wrapped cells still needs maintainer spot checks before release.
+- Validation: 113 tests, typecheck, lint and bundle build passed. No deployment or account changes.
