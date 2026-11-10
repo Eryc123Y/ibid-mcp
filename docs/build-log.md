@@ -33,3 +33,9 @@
 - Tests first covered Atom parsing, category-only queries, empty/error feeds, and concurrent slow connections. Implemented arXiv search for recent/category requests with IDs, DOI, dates, authors and abstract.
 - The arXiv connection itself runs inside a serialized Durable Object operation, preventing overlap even when a response takes longer than three seconds.
 - Validation: 101 tests, typecheck, lint and bundle build passed; documentation was read, no arXiv API request was made.
+
+## P3c
+
+- Wrote failing tests for forum/title/arXiv resolution, official-review filtering, rating summaries, compact/full output and missing ratings, then added OpenReview API v2 and the reviews tool.
+- Ambiguous title matches require a forum ID instead of silently selecting one. Only public official reviews contribute to statistics; meta reviews are excluded. Pagination reports truncation.
+- Validation: 105 tests, typecheck, lint and bundle build passed. Read the official OpenReview client/documentation only.

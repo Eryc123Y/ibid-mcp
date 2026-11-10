@@ -125,5 +125,7 @@ export function buildServer(env: AppEnv): McpServer {
     async (args) => run(env, (ctx) => coauthorship(ctx, args)),
   );
 
+  server.registerTool("reviews", {title:"Public peer reviews",description:"Find OpenReview reviews by title, forum ID/URL or arXiv ID. Returns venue, decision, reviewer rating mean and population standard deviation, and short summaries.",inputSchema:z.object({query:z.string().min(2).max(500),full:z.boolean().default(false)}),annotations:{readOnlyHint:true,openWorldHint:true}},async(args)=>run(env,ctx=>ctx.openreview!.reviews(args.query,args.full)));
+
   return server;
 }

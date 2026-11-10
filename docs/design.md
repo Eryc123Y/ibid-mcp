@@ -100,3 +100,9 @@ and [API terms](https://info.arxiv.org/help/api/tou.html). Requests are serializ
 inside its SourceLimiter object, with at least three seconds between starts and
 a bounded connection timeout. No PDF/full-text scraping is used. Tests use a
 small synthetic Atom response matching the documented schema.
+
+OpenReview reads public API v2 notes without credentials. Request shapes follow
+its [official client](https://github.com/openreview/openreview-py/blob/master/openreview/api/client.py).
+Only Official_Review/Review invitations contribute ratings; population standard
+deviation is reported. Private reviews are neither requested nor inferred.
+Forum pagination is bounded at 1,000 notes and marks truncation explicitly.
