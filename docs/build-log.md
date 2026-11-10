@@ -52,3 +52,10 @@
 - Added failing tests for exact/fuzzy lookup, rank provenance, CSV/PDF parsing and download integration. Added the seventh tool and a deploy-time downloader; only synthetic rank records are tracked.
 - Inspected official documents outside tests: local parsing extracted 558 CCF rows (552 with DBLP links) and 987 ICORE rows. These downloads and parsed data remain ignored local inspection artifacts, not package contents. PDF extraction of wrapped cells still needs maintainer spot checks before release.
 - Validation: 113 tests, typecheck, lint and bundle build passed. No deployment or account changes.
+
+## P5
+
+- Tests first covered sample cardinality/uniqueness, 15-by-40 stratification, year checks, the 90% threshold and the arXiv baseline. Added a deterministic replay runner through real search/adapters, with a hard network-free path.
+- Four evaluation-harness tests pass, including replay of 600 explicitly synthetic unit-test cases. This is not the requested empirical acceptance result.
+- Blocker: the referenced checkout contains the measurement report and sampling scripts but not the original 600-paper output or recorded title-search responses. Asked for an existing snapshot location. `npm run test:eval` exits 2 and writes `status: unverified`; it does not invent a passing dataset. No live tests or collection ran.
+- The original measurement uses ICCV 2023, unlike the roadmap's shorthand “2024 papers”; the validator preserves this explicit original-method exception.

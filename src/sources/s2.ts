@@ -22,6 +22,7 @@ export interface S2Deps {
   readonly acquire: () => Promise<void>;
   readonly penalize: (delayMs: number) => Promise<void>;
   readonly fetchImpl?: typeof fetch;
+  readonly sleep?: (ms:number)=>Promise<void>;
   readonly onResponse?: (response:Response) => Promise<void>;
 }
 
@@ -96,6 +97,7 @@ export function createS2Client(deps: S2Deps) {
     beforeAttempt: deps.acquire,
     onThrottled: deps.penalize,
     fetchImpl: deps.fetchImpl,
+    sleep: deps.sleep,
   };
 
   const get = <T>(path: string, params: Record<string, string | number | undefined>): Promise<T> => {

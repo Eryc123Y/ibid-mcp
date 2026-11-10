@@ -21,6 +21,7 @@ export interface OpenAlexDeps {
   readonly apiKey?: string;
   readonly mailto?: string;
   readonly fetchImpl?: typeof fetch;
+  readonly sleep?: (ms:number)=>Promise<void>;
   readonly acquire?: () => Promise<void>;
   readonly penalize?: (ms:number) => Promise<void>;
   readonly onResponse?: (response:Response) => Promise<void>;
@@ -148,7 +149,7 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
       init: { headers: { accept: "application/json" } },
       cacheKey: `GET ${publicUrl}`, // never includes api_key
       ttlSeconds: TTL_SECONDS,
-      retry: { retries: 1, baseDelayMs: 1000, fetchImpl: deps.fetchImpl, beforeAttempt:deps.acquire, onThrottled:deps.penalize },
+      retry: { retries: 1, baseDelayMs: 1000, fetchImpl: deps.fetchImpl, sleep:deps.sleep, beforeAttempt:deps.acquire, onThrottled:deps.penalize },
       onResponse: async (r) => {recordBudget(r.headers);await deps.onResponse?.(r);},
     });
   };

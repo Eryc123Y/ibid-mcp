@@ -36,7 +36,8 @@
     "lint": "eslint .",
     "test:live": "vitest run --config vitest.live.config.ts",
     "build": "node scripts/build.mjs",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "test:eval": "node scripts/eval.mjs"
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "1.2.3",

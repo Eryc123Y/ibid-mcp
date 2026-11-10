@@ -23,6 +23,7 @@
     "src/**/*.ts",
     "test/**/*.ts",
     "cli/**/*.ts",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "eval/**/*.ts"
   ]
 }
