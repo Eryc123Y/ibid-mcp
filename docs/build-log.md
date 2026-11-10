@@ -111,3 +111,10 @@
 - Downloaded files, full tables and real audit expectations remain untracked.
   Before commit: all seven prescribed checks passed (168 tests), four coverage
   metrics at least 80%, identifier scan and diff whitespace checks clean.
+
+## Round 2 — item 4
+
+- Corrected the pairing alphabet comment from 31 symbols to 32; directly counted
+  the literal (32). No runtime behavior changed.
+- Before commit: all seven prescribed checks passed (168 tests), all coverage
+  metrics above 80%, identifier scan and diff whitespace check clean.

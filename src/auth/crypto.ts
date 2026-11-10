@@ -22,7 +22,7 @@ export async function constantTimeEqual(
 }
 export function pairingCode(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  // Rejection sampling avoids modulo bias (alphabet has 31 symbols).
+  // Rejection sampling avoids modulo bias (alphabet has 32 symbols).
   let code = "";
   while (code.length < 8) {
     const bytes = crypto.getRandomValues(new Uint8Array(16));
