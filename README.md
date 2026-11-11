@@ -95,7 +95,7 @@ FEED_COMMAND='["node", "/absolute/path/to/litscout-mcp/dist/cli/index.js", "watc
 | Option | Meaning |
 |---|---|
 | `--since YYYY-MM-DD` | Papers the source first listed on or after this day (required) |
-| `--venues <file>` | The watch list, `{"venues": [{"name", "kind", "issn"?, "openalex_source"?, "openreview_venues"?, "sources"?}]}`; other fields are ignored (required) |
+| `--venues <file>` | The watch list, `{"venues": [{"name", "kind", "issn"?, "openalex_source"?, "acl_anthology"?, "pmlr"?, "doi_prefix"?, "openreview"?, "jmlr"?, "openreview_venues"?, "sources"?}]}`; other fields are ignored (required) |
 | `--kinds journal,conference` | Which venues to read; default `journal` |
 | `--until YYYY-MM-DD` | Last listing day to include |
 
@@ -112,8 +112,8 @@ FEED_COMMAND='["node", "/absolute/path/to/litscout-mcp/dist/cli/index.js", "watc
   `proceedings-article` (issues, components, peer reviews), and titles such as
   editorials, errata, corrections ("Correction to ..."), retractions, front and
   back matter, covers, tables of contents, issue or publication information,
-  information for authors, indexes, reviewer lists, obituaries and calls for
-  papers. OpenAlex conference works of type paratext, erratum, editorial,
+  information for authors, indexes, reviewer lists, obituaries, calls for
+  papers and prefaces. OpenAlex conference works of type paratext, erratum, editorial,
   retraction, peer-review or supplementary materials are dropped the same way.
 - **Conferences** (`--kinds conference`, venues with `openalex_source`): OpenAlex
   works published since a year before `--since` whose OpenAlex `created_date` is
@@ -122,17 +122,41 @@ FEED_COMMAND='["node", "/absolute/path/to/litscout-mcp/dist/cli/index.js", "watc
   venue's last year (a few OpenAlex requests per venue). Run it weekly, for
   example with a second `FEED_COMMAND` ending in `"watch", "--kinds", "conference"`;
   LitScout Daily caps what it publishes per run (`FEED_MAX_PER_RUN`).
-- **OpenReview** is not read yet: its API answers anonymous scripts with a
-  browser challenge, so it waits on an `OPENREVIEW_TOKEN`. A venue with only
-  `openreview_venues` is skipped with one stderr line. ECCV, which has no
-  OpenAlex source or ISSN of its own, is skipped too.
+- **Sources beyond Crossref and OpenAlex.** A venue may name one of these
+  fields; when it names several, the most precise wins, in this order:
+  `jmlr`, `acl_anthology`, `pmlr`, `doi_prefix`, `openreview`, then `issn`
+  (journals) or `openalex_source` (conferences). `--kinds` still decides which
+  venues a run reads.
+
+  | Field | Value | Source and dating |
+  |---|---|---|
+  | `acl_anthology` | `acl`, `emnlp`, `naacl`, `eacl`, `conll`, `tacl`, `cl` or `mol` | The ACL Anthology's XML metadata in [acl-org/acl-anthology](https://github.com/acl-org/acl-anthology) (`data/xml/<year>.<venue>.xml`). Main volumes only: long, short and main papers for the conferences (no Findings, workshops, demos, tutorials, industry or student research workshop), every paper of TACL and CL, the main volume of CoNLL and MoL (no shared tasks such as BabyLM). A paper is new when it is in the file at the last commit in the window but not at the last commit before `--since`, so the growing TACL and CL volumes report each paper once. Dated by the volume's ingestion date when it falls in the window, else by that commit's day; for TACL and CL that is the volume's latest ingestion. `source` is `acl-anthology`; `url` is the Anthology page, `oa_url` its PDF. With `OPENALEX_API_KEY`, DOIs are looked up in OpenAlex for arXiv IDs. |
+  | `pmlr` | A PMLR series as PMLR names it, e.g. `COLT`, `ALT`, `AISTATS`, `UAI`, `CoLLAs` | PMLR's volume index (`proceedings.mlr.press/proceedings.yaml`, "Proceedings of COLT 2026") and each volume's citeproc export (`assets/bib/citeproc.yaml`), with abstracts. Volumes from the year before `--since` to the year after the window are read; papers are dated by the volume's publication date. `source` is `pmlr`; no DOI. |
+  | `doi_prefix` | A DOI prefix, e.g. `10.4230/LIPIcs.ITP`, `10.4230/LIPIcs.ICALP` | The registration agency from doi.org's handle API. DataCite DOIs (all of LIPIcs) are searched by DOI and creation date (`source` `datacite`); Crossref DOIs by registrant prefix and `from-created-date`, keeping DOIs under the prefix (`source` `crossref`). Other agencies are skipped. OpenAlex then enriches by DOI, as for journals. |
+  | `openreview` | An OpenReview venue id or a list; `{year}` runs from the year before `--since` to the year after the window | Accepted papers (notes whose `content.venueid` is the id), dated by publication time. Examples: `TMLR`, `colmweb.org/COLM/{year}/Conference`, `rl-conference.cc/RLC/{year}/Conference`, `lifelong-ml.cc/CoLLAs/{year}/Conference`. The API answers anonymous scripts with a browser challenge, so this needs `OPENREVIEW_TOKEN`, or `OPENREVIEW_USERNAME` and `OPENREVIEW_PASSWORD` for a login. Without them the venue falls back to its `issn` or `openalex_source`, or is skipped with one stderr line. `source` is `openreview`. |
+  | `jmlr` | `true` | JMLR's own RSS feed (`https://www.jmlr.org/jmlr.xml`: the current volume with abstracts). JMLR has no DOIs, OpenAlex has almost none of its recent papers, DBLP answers scripts with a bot challenge, and the feed and BibTeX carry only a year, so watch keeps a ledger of the papers it has seen (`watch-jmlr.json` in `LITSCOUT_STATE_DIR`, default `~/.config/litscout`) and dates each paper by the UTC day it first appeared. The first run records the current feed and reports nothing. `source` is `jmlr`. |
+
+  PMLR and JMLR papers, and Anthology papers without a DOI (Mathematics of
+  Language), carry no DOI, arXiv ID or OpenReview ID; their `url` is stable.
+  `openreview_venues` is still informational only: a venue with nothing else is
+  skipped with one stderr line. ECCV, which has no OpenAlex source or ISSN of
+  its own, is skipped too.
+- **Environment.** `OPENALEX_API_KEY` (enrichment), `GITHUB_TOKEN` (optional:
+  raises GitHub's limit of 60 commit lookups an hour; the Anthology check makes
+  one to three per venue and year), `OPENREVIEW_TOKEN` or
+  `OPENREVIEW_USERNAME` and `OPENREVIEW_PASSWORD`, and `LITSCOUT_STATE_DIR`.
+  Requests carry the User-Agent `litscout-watch/0.1` and the repository URL,
+  are spaced per host, and are retried a bounded number of times. Days are UTC,
+  as in LitScout Daily.
 - `UNPAYWALL_EMAIL`, when set, is sent to Crossref as the polite-pool `mailto`;
   nothing else is sent by default. Keys come from the environment only and are
   never printed.
 - Exit status: 0 when anything could be fetched (even no papers); 2 for bad
   arguments or an unreadable venue file; 1 when every source request failed.
-  The last stderr line is the one-line reason. The last line of a successful
-  run counts papers, abstracts, open-access links and requests per source.
+  A venue whose source fails is reported on its own stderr line and does not
+  stop the others. The last stderr line is the one-line reason. The last line
+  of a successful run counts papers, abstracts, open-access links and requests
+  per source.
 
 ## Tools
 
