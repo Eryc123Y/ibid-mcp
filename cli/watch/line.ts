@@ -1,7 +1,14 @@
 /** The feed contract shared with LitScout Daily (`summaries/feed.py`): one JSON object per stdout line. */
 
 export interface FeedLine {
-  readonly source: "openalex" | "crossref" | "openreview";
+  readonly source:
+    | "openalex"
+    | "crossref"
+    | "openreview"
+    | "acl-anthology"
+    | "pmlr"
+    | "datacite"
+    | "jmlr";
   readonly title: string;
   readonly authors: readonly string[];
   readonly venue: string;
@@ -28,6 +35,7 @@ const NON_ARTICLE_TITLES: readonly RegExp[] = [
   /^(?:\d{4}\s+)?(?:author\s+|subject\s+)?index\b/i,
   /^(?:list of\s+)?reviewers\b|^reviewer list\b|^thanks? (?:you )?to (?:our )?reviewers\b/i,
   /^(?:in memoriam|obituary|call for papers|blank page)\b/i,
+  /(?:^|:\s*)preface\s*$/i,
 ];
 
 export function isNonArticleTitle(title: string): boolean {

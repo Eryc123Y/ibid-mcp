@@ -1,0 +1,274 @@
+{
+  "data": [
+    {
+      "id": "10.4230/lipics.itp.2026",
+      "type": "dois",
+      "attributes": {
+        "doi": "10.4230/lipics.itp.2026",
+        "creators": [
+          {
+            "name": "Komendantskaya, Ekaterina",
+            "givenName": "Ekaterina",
+            "familyName": "Komendantskaya",
+            "nameType": "Personal"
+          },
+          {
+            "name": "Nipkow, Tobias",
+            "givenName": "Tobias",
+            "familyName": "Nipkow",
+            "nameType": "Personal"
+          }
+        ],
+        "titles": [
+          {
+            "lang": "en",
+            "title": "LIPIcs, Volume 382, ITP 2026, Complete Volume"
+          }
+        ],
+        "publicationYear": 2026,
+        "descriptions": [
+          {
+            "descriptionType": "Abstract",
+            "description": "Synthetic abstract for paper 0: the recorded text is not committed."
+          }
+        ],
+        "dates": [
+          {
+            "date": "2026",
+            "dateType": "Issued"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Available"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Created"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Copyrighted"
+          }
+        ],
+        "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITP.2026",
+        "created": "2026-07-16T09:47:03Z",
+        "registered": "2026-07-16T09:47:03Z",
+        "types": {
+          "schemaOrg": "Periodical",
+          "resourceTypeGeneral": "ConferenceProceeding",
+          "citeproc": "article",
+          "bibtex": "proceedings",
+          "ris": "CONF",
+          "resourceType": "Volume"
+        }
+      }
+    },
+    {
+      "id": "10.4230/lipics.itp.2026.0",
+      "type": "dois",
+      "attributes": {
+        "doi": "10.4230/lipics.itp.2026.0",
+        "creators": [
+          {
+            "name": "Komendantskaya, Ekaterina",
+            "givenName": "Ekaterina",
+            "familyName": "Komendantskaya",
+            "nameType": "Personal"
+          },
+          {
+            "name": "Nipkow, Tobias",
+            "givenName": "Tobias",
+            "familyName": "Nipkow",
+            "nameType": "Personal"
+          }
+        ],
+        "titles": [
+          {
+            "lang": "en",
+            "title": "Front Matter, Table of Contents, Preface, Conference Organization"
+          }
+        ],
+        "publicationYear": 2026,
+        "descriptions": [
+          {
+            "descriptionType": "Abstract",
+            "description": "Synthetic abstract for paper 1: the recorded text is not committed."
+          }
+        ],
+        "dates": [
+          {
+            "date": "2026",
+            "dateType": "Issued"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Available"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Created"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Copyrighted"
+          }
+        ],
+        "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITP.2026.0",
+        "created": "2026-07-16T09:47:04Z",
+        "registered": "2026-07-16T09:47:04Z",
+        "types": {
+          "schemaOrg": "ScholarlyArticle",
+          "resourceTypeGeneral": "Text",
+          "citeproc": "article-journal",
+          "bibtex": "inproceedings",
+          "ris": "RPRT",
+          "resourceType": "Front Matter"
+        }
+      }
+    },
+    {
+      "id": "10.4230/lipics.itp.2026.2",
+      "type": "dois",
+      "attributes": {
+        "doi": "10.4230/lipics.itp.2026.2",
+        "creators": [
+          {
+            "name": "Unruh, Dominique",
+            "givenName": "Dominique",
+            "familyName": "Unruh",
+            "nameType": "Personal"
+          }
+        ],
+        "titles": [
+          {
+            "lang": "en",
+            "title": "Developing a Quantum Crypto Theorem Prover from Scratch (Invited Talk)"
+          }
+        ],
+        "publicationYear": 2026,
+        "descriptions": [
+          {
+            "descriptionType": "Abstract",
+            "description": "Synthetic abstract for paper 2: the recorded text is not committed."
+          }
+        ],
+        "dates": [
+          {
+            "date": "2026",
+            "dateType": "Issued"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Available"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Created"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Copyrighted"
+          }
+        ],
+        "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITP.2026.2",
+        "created": "2026-07-16T09:47:06Z",
+        "registered": "2026-07-16T09:47:06Z",
+        "types": {
+          "schemaOrg": "Article",
+          "resourceTypeGeneral": "ConferencePaper",
+          "citeproc": "",
+          "bibtex": "inproceedings",
+          "ris": "CPAPER",
+          "resourceType": "Invited Talk"
+        }
+      }
+    },
+    {
+      "id": "10.4230/lipics.itp.2026.36",
+      "type": "dois",
+      "attributes": {
+        "doi": "10.4230/lipics.itp.2026.36",
+        "creators": [
+          {
+            "name": "Bodingbauer, Jonas",
+            "givenName": "Jonas",
+            "familyName": "Bodingbauer",
+            "nameType": "Personal"
+          },
+          {
+            "name": "Hajdu, Márton",
+            "givenName": "Márton",
+            "familyName": "Hajdu",
+            "nameType": "Personal"
+          },
+          {
+            "name": "Kovács, Laura",
+            "givenName": "Laura",
+            "familyName": "Kovács",
+            "nameType": "Personal"
+          },
+          {
+            "name": "Polaczek, Axel",
+            "givenName": "Axel",
+            "familyName": "Polaczek",
+            "nameType": "Personal"
+          },
+          {
+            "name": "Rawson, Michael",
+            "givenName": "Michael",
+            "familyName": "Rawson",
+            "nameType": "Personal"
+          }
+        ],
+        "titles": [
+          {
+            "lang": "en",
+            "title": "Lean on Vampire Proofs (Short Paper)"
+          }
+        ],
+        "publicationYear": 2026,
+        "descriptions": [
+          {
+            "descriptionType": "Abstract",
+            "description": "Synthetic abstract for paper 3: the recorded text is not committed."
+          }
+        ],
+        "dates": [
+          {
+            "date": "2026",
+            "dateType": "Issued"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Available"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Created"
+          },
+          {
+            "date": "2026-07-16",
+            "dateType": "Copyrighted"
+          }
+        ],
+        "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITP.2026.36",
+        "created": "2026-07-16T09:47:41Z",
+        "registered": "2026-07-16T09:47:42Z",
+        "types": {
+          "schemaOrg": "Article",
+          "resourceTypeGeneral": "ConferencePaper",
+          "citeproc": "",
+          "bibtex": "inproceedings",
+          "ris": "CPAPER",
+          "resourceType": "Short Paper"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "total": 4
+  },
+  "links": {
+    "self": "https://api.datacite.org/dois"
+  }
+}

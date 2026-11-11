@@ -26,7 +26,7 @@ export interface Outcome {
   readonly skipped: number;
 }
 
-interface Found {
+export interface Found {
   readonly venue: string;
   readonly item: CrossrefItem;
   readonly doi: string;
@@ -42,7 +42,7 @@ export function keep(
   return isNonArticleTitle(title) ? null : { doi, title };
 }
 
-function line(found: Found, e: Partial<Enrichment>): FeedLine {
+export function crossrefLine(found: Found, e: Partial<Enrichment>): FeedLine {
   return {
     source: "crossref",
     title: found.title,
@@ -95,7 +95,7 @@ export async function journalLines(
     found.map((f) => f.doi),
   );
   return {
-    lines: found.map((f) => line(f, extra.get(f.doi) ?? {})),
+    lines: found.map((f) => crossrefLine(f, extra.get(f.doi) ?? {})),
     attempted,
     failed,
     skipped,

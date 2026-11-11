@@ -1,0 +1,25 @@
+
+- volume: r16
+  url:  "https://proceedings.mlr.press/r16"
+  yaml:  "https://proceedings.mlr.press/r16/assets/bib/citeproc.yaml"
+  description: "Proceedings of UAI 2018"
+- volume: 337
+  url:  "https://proceedings.mlr.press/v337"
+  yaml:  "https://proceedings.mlr.press/v337/assets/bib/citeproc.yaml"
+  description: "Proceedings of UAI 2026"
+- volume: 336
+  url:  "https://proceedings.mlr.press/v336"
+  yaml:  "https://proceedings.mlr.press/v336/assets/bib/citeproc.yaml"
+  description: "Proceedings of COLT 2026"
+- volume: 333
+  url:  "https://proceedings.mlr.press/v333"
+  yaml:  "https://proceedings.mlr.press/v333/assets/bib/citeproc.yaml"
+  description: "Proceedings of CHIL 2026"
+- volume: 328
+  url:  "https://proceedings.mlr.press/v328"
+  yaml:  "https://proceedings.mlr.press/v328/assets/bib/citeproc.yaml"
+  description: "Proceedings of CPAL 2026"
+- volume: 291
+  url:  "https://proceedings.mlr.press/v291"
+  yaml:  "https://proceedings.mlr.press/v291/assets/bib/citeproc.yaml"
+  description: "Proceedings of COLT 2025"

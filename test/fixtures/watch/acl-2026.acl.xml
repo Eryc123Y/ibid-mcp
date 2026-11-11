@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<collection id="2026.acl">
+  <volume id="long" type="proceedings" ingest-date="2026-06-22">
+    <!-- https://aclanthology.org/2026.acl-long/ -->
+    <meta>
+      <booktitle>Proceedings of the 64th Annual Meeting of the <fixed-case>A</fixed-case>ssociation for <fixed-case>C</fixed-case>omputational <fixed-case>L</fixed-case>inguistics (Volume 1: Long Papers)</booktitle>
+      <editor><first>Maria</first><last>Liakata</last></editor>
+      <editor id="viviane-moreira"><first>Viviane P.</first><last>Moreira</last></editor>
+      <editor><first>Jiajun</first><last>Zhang</last></editor>
+      <editor><first>David</first><last>Jurgens</last></editor>
+      <publisher>Association for Computational Linguistics</publisher>
+      <address>San Diego, California, United States</address>
+      <isbn>979-8-89176-390-6</isbn>
+      <month>July</month>
+      <year>2026</year>
+      <venue>acl</venue>
+      <doi>10.18653/v1/2026.acl-long</doi>
+    </meta>
+    <frontmatter>
+      <!-- https://aclanthology.org/2026.acl-long.0/ -->
+      <pdf hash="8f07fca6"/>
+      <bibkey>acl-2026-long</bibkey>
+      <doi>10.18653/v1/2026.acl-long.0</doi>
+    </frontmatter>
+    <paper id="1">
+      <!-- https://aclanthology.org/2026.acl-long.1/ -->
+      <title><fixed-case>O</fixed-case>cto<fixed-case>T</fixed-case>ools: A Multi-Agent Framework with Extensible Tools for Complex Reasoning</title>
+      <author id="pan-lu" orcid="0009-0001-5862-302X" openreview="~Pan_Lu2"><first>Pan</first><last>Lu</last></author>
+      <author id="bowen-chen-0976" orcid="0000-0002-5822-0976" openreview="~Bowen_Chen3"><first>Bowen</first><last>Chen</last><affiliation>Stanford University</affiliation></author>
+      <author openreview="~Sheng_Liu2"><first>Sheng</first><last>Liu</last></author>
+      <author id="rahul-thapa" orcid="0000-0002-1137-955X" openreview="~Rahul_Thapa1"><first>Rahul</first><last>Thapa</last></author>
+      <author openreview="~Joseph_Boen1"><first>Joseph</first><last>Boen</last><affiliation>Stanford University</affiliation></author>
+      <author id="james-zou" orcid="0000-0001-8880-4764" openreview="~James_Zou1"><first>James</first><last>Zou</last><affiliation>Stanford University</affiliation></author>
+      <pages>1-86</pages>
+      <abstract>Synthetic abstract for paper 0: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="96890ff2"/>
+      <attachment hash="ab6aab3d" type="checklist">2026.acl-long.1.checklist.pdf</attachment>
+      <bibkey>lu-etal-2026-octotools</bibkey>
+      <doi>10.18653/v1/2026.acl-long.1</doi>
+    </paper>
+    <paper id="12">
+      <!-- https://aclanthology.org/2026.acl-long.12/ -->
+      <title>Parallel Universes, Parallel Languages: A Comprehensive Study on <fixed-case>LLM</fixed-case>-based Multilingual Counterfactual Example Generation</title>
+      <author id="qianli-wang" orcid="0009-0004-8336-1684" openreview="~Qianli_Wang1"><first>Qianli</first><last>Wang</last></author>
+      <author id="van-bach-nguyen" orcid="0000-0002-4576-9302" openreview="~Van_Bach_Nguyen2"><first>Van Bach</first><last>Nguyen</last><affiliation>Phillips-Universität Marburg</affiliation></author>
+      <author id="yihong-liu" orcid="0000-0003-1073-0958" openreview="~Yihong_Liu1"><first>Yihong</first><last>Liu</last><affiliation>Ludwig-Maximilians-Universität München</affiliation></author>
+      <author id="fedor-splitt" orcid="0009-0008-7316-3675" openreview="~Fedor_Splitt1"><first>Fedor</first><last>Splitt</last><affiliation>Technische Universität Berlin</affiliation></author>
+      <author id="nils-feldhus" orcid="0009-0008-7408-7483" openreview="~Nils_Feldhus1"><first>Nils</first><last>Feldhus</last></author>
+      <author id="christin-seifert" orcid="0000-0002-6776-3868" openreview="~Christin_Seifert1"><first>Christin</first><last>Seifert</last><affiliation>Phillips-Universität Marburg</affiliation></author>
+      <author id="hinrich-schutze" orcid="0000-0001-9514-7934" openreview="~Hinrich_Schuetze3"><first>Hinrich</first><last>Schuetze</last></author>
+      <author id="sebastian-moller" orcid="0000-0003-3057-0760" openreview="~Sebastian_Möller1"><first>Sebastian</first><last>Möller</last></author>
+      <author id="vera-schmitt" orcid="0000-0002-9735-6956" openreview="~Vera_Schmitt1"><first>Vera</first><last>Schmitt</last><affiliation>Technische Universität Berlin</affiliation></author>
+      <pages>323-346</pages>
+      <abstract>Synthetic abstract for paper 1: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="230f1d08"/>
+      <attachment hash="d9540191" type="checklist">2026.acl-long.12.checklist.pdf</attachment>
+      <bibkey>wang-etal-2026-parallel</bibkey>
+      <doi>10.18653/v1/2026.acl-long.12</doi>
+    </paper>
+  </volume>
+  <volume id="short" type="proceedings" ingest-date="2026-06-22">
+    <!-- https://aclanthology.org/2026.acl-short/ -->
+    <meta>
+      <booktitle>Proceedings of the 64th Annual Meeting of the <fixed-case>A</fixed-case>ssociation for <fixed-case>C</fixed-case>omputational <fixed-case>L</fixed-case>inguistics (Volume 2: Short Papers)</booktitle>
+      <editor><first>Maria</first><last>Liakata</last></editor>
+      <editor id="viviane-moreira"><first>Viviane P.</first><last>Moreira</last></editor>
+      <editor><first>Jiajun</first><last>Zhang</last></editor>
+      <editor><first>David</first><last>Jurgens</last></editor>
+      <publisher>Association for Computational Linguistics</publisher>
+      <address>San Diego, California, United States</address>
+      <isbn>979-8-89176-391-3</isbn>
+      <month>July</month>
+      <year>2026</year>
+      <venue>acl</venue>
+      <doi>10.18653/v1/2026.acl-short</doi>
+    </meta>
+    <frontmatter>
+      <!-- https://aclanthology.org/2026.acl-short.0/ -->
+      <pdf hash="d4d4b10e"/>
+      <bibkey>acl-2026-short</bibkey>
+      <doi>10.18653/v1/2026.acl-short.0</doi>
+    </frontmatter>
+    <paper id="12">
+      <!-- https://aclanthology.org/2026.acl-short.12/ -->
+      <title><fixed-case>S</fixed-case>truct<fixed-case>M</fixed-case>em: Structured Memory for Long-Horizon Behavior in <fixed-case>LLM</fixed-case>s</title>
+      <author id="buqiang-xu" orcid="0009-0006-7342-9627" openreview="~Buqiang_Xu1"><first>Buqiang</first><last>Xu</last></author>
+      <author id="yijun-chen-1648" orcid="0009-0006-9287-1648" openreview="~Yijun_Chen8"><first>Yijun</first><last>Chen</last></author>
+      <author id="jizhan-fang" orcid="0009-0008-0998-9341" openreview="~Jizhan_Fang1"><first>Jizhan</first><last>Fang</last></author>
+      <author id="ruobin-zhong" orcid="0009-0003-7453-5251" openreview="~Ruobin_Zhong1"><first>Ruobin</first><last>Zhong</last><affiliation>Zhejiang University</affiliation></author>
+      <author id="yunzhi-yao" orcid="0000-0001-9458-696X" openreview="~Yunzhi_Yao1"><first>Yunzhi</first><last>Yao</last><affiliation>Zhejiang University</affiliation></author>
+      <author id="yuqi-zhu" orcid="0009-0009-4041-2601" openreview="~Yuqi_Zhu2"><first>Yuqi</first><last>Zhu</last><affiliation>Zhejiang University</affiliation></author>
+      <author openreview="~Lun_Du1"><first>Lun</first><last>Du</last><affiliation>Ant Group</affiliation></author>
+      <author id="shumin-deng" orcid="0000-0002-4049-8478" openreview="~Shumin_Deng1"><first>Shumin</first><last>Deng</last><affiliation>Zhejiang University</affiliation></author>
+      <pages>122-146</pages>
+      <abstract>Synthetic abstract for paper 0: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="d16e53a8"/>
+      <attachment hash="bf071728" type="checklist">2026.acl-short.12.checklist.pdf</attachment>
+      <bibkey>xu-etal-2026-structmem</bibkey>
+      <doi>10.18653/v1/2026.acl-short.12</doi>
+    </paper>
+  </volume>
+  <volume id="demo" type="proceedings" ingest-date="2026-06-22">
+    <!-- https://aclanthology.org/2026.acl-demo/ -->
+    <meta>
+      <booktitle>Proceedings of the 64th Annual Meeting of the <fixed-case>A</fixed-case>ssociation for <fixed-case>C</fixed-case>omputational <fixed-case>L</fixed-case>inguistics (Volume 3: System Demonstrations)</booktitle>
+      <editor><first>Greg</first><last>Durrett</last></editor>
+      <editor><first>Ping</first><last>Jian</last></editor>
+      <publisher>Association for Computational Linguistics</publisher>
+      <address>San Diego, California, United States</address>
+      <isbn>979-8-89176-392-0</isbn>
+      <month>July</month>
+      <year>2026</year>
+      <venue>acl</venue>
+      <doi>10.18653/v1/2026.acl-demo</doi>
+    </meta>
+    <frontmatter>
+      <!-- https://aclanthology.org/2026.acl-demo.0/ -->
+      <pdf hash="e47dd1bf"/>
+      <bibkey>acl-2026-demo</bibkey>
+      <doi>10.18653/v1/2026.acl-demo.0</doi>
+    </frontmatter>
+    <paper id="12">
+      <!-- https://aclanthology.org/2026.acl-demo.12/ -->
+      <title><fixed-case>AI</fixed-case>nterviewer: A Platform for Designing and Conducting <fixed-case>AI</fixed-case>-led Qualitative Interviews</title>
+      <author id="tobias-gardhus" orcid="0009-0005-2358-8497"><first>Tobias</first><last>Gårdhus</last></author>
+      <author><first>Nikolas</first><last>Vitsakis</last></author>
+      <author id="fie-lejre-frederiksen" orcid="0009-0009-4035-5491"><first>Fie Lejre</first><last>Frederiksen</last></author>
+      <author id="anna-rogers" orcid="0000-0002-4845-4023"><first>Anna</first><last>Rogers</last><affiliation>IT University of Copenhagen</affiliation></author>
+      <author id="hjalmar-bang-carlsen" orcid="0000-0002-2638-0932"><first>Hjalmar Bang</first><last>Carlsen</last><affiliation>Copenhagen University</affiliation></author>
+      <pages>119-127</pages>
+      <abstract>Synthetic abstract for paper 0: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="33f577a1"/>
+      <bibkey>gardhus-etal-2026-ainterviewer</bibkey>
+      <doi>10.18653/v1/2026.acl-demo.12</doi>
+    </paper>
+  </volume>
+  <volume id="srw" type="proceedings" ingest-date="2026-06-22">
+    <!-- https://aclanthology.org/2026.acl-srw/ -->
+    <meta>
+      <booktitle>Proceedings of the 64th Annual Meeting of the <fixed-case>A</fixed-case>ssociation for <fixed-case>C</fixed-case>omputational <fixed-case>L</fixed-case>inguistics (Volume 4: Student Research Workshop)</booktitle>
+      <editor><first>Santosh</first><last>T.Y.S.S.</last></editor>
+      <editor><first>Juan Diego</first><last>Rodriguez</last></editor>
+      <editor><first>Ona</first><last>de Gibert</last></editor>
+      <publisher>Association for Computational Linguistics</publisher>
+      <address>San Diego, California, United States</address>
+      <isbn>979-8-89176-393-7</isbn>
+      <month>July</month>
+      <year>2026</year>
+      <venue>acl</venue>
+      <venue>ws</venue>
+      <doi>10.18653/v1/2026.acl-srw</doi>
+    </meta>
+    <frontmatter>
+      <!-- https://aclanthology.org/2026.acl-srw.0/ -->
+      <pdf hash="c2966351"/>
+      <bibkey>acl-2026-srw</bibkey>
+      <doi>10.18653/v1/2026.acl-srw.0</doi>
+    </frontmatter>
+    <paper id="1">
+      <!-- https://aclanthology.org/2026.acl-srw.1/ -->
+      <title>Multi-Agent Reasoning Improves Compute Efficiency: <fixed-case>P</fixed-case>areto-Optimal Test-Time Scaling</title>
+      <author><first>Florian Valentin</first><last>Wunderlich</last><affiliation>Georg-August Universität Göttingen</affiliation></author>
+      <author id="lars-benedikt-kaesberg" orcid="0009-0002-1686-3743"><first>Lars Benedikt</first><last>Kaesberg</last><affiliation>Georg-August Universität Göttingen</affiliation></author>
+      <author id="jan-philip-wahle" orcid="0000-0002-2116-9767"><first>Jan Philip</first><last>Wahle</last><affiliation>Georg-August Universität Göttingen</affiliation></author>
+      <author id="terry-ruas" orcid="0000-0002-9440-780X"><first>Terry</first><last>Ruas</last><affiliation>Georg-August Universität Göttingen</affiliation></author>
+      <author id="bela-gipp" orcid="0000-0001-6522-3019"><first>Bela</first><last>Gipp</last><affiliation>Georg-August Universität Göttingen</affiliation></author>
+      <pages>1-14</pages>
+      <abstract>Synthetic abstract for paper 0: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="2e2af0e5"/>
+      <bibkey>wunderlich-etal-2026-multi</bibkey>
+      <doi>10.18653/v1/2026.acl-srw.1</doi>
+    </paper>
+  </volume>
+</collection>

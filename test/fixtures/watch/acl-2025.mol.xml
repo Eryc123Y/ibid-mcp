@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<collection id="2025.mol">
+  <volume id="1" type="proceedings" ingest-date="2026-02-17">
+    <!-- https://aclanthology.org/2025.mol-1/ -->
+    <meta>
+      <booktitle>Proceedings of the 18th Meeting on the Mathematics of Language</booktitle>
+      <editor><first>Thomas</first><last>Graf</last></editor>
+      <editor><first>Matthew</first><last>Hayden</last></editor>
+      <editor><first>Jeffrey</first><last>Heinz</last></editor>
+      <editor><first>Lawrence</first><last>Moss</last></editor>
+      <editor><first>Yang</first><last>Wang</last></editor>
+      <publisher>Association for Computational Linguistics</publisher>
+      <address>Stony Brook, NY, USA</address>
+      <month>August</month>
+      <year>2025</year>
+      <pdf hash="1e76cb03"/>
+      <sig>sigmol</sig>
+      <venue>mol</venue>
+    </meta>
+    <frontmatter>
+      <!-- https://aclanthology.org/2025.mol-1.0/ -->
+      <pdf hash="c74c5b6d"/>
+      <bibkey>mol-2025-1</bibkey>
+    </frontmatter>
+    <paper id="1">
+      <!-- https://aclanthology.org/2025.mol-1.1/ -->
+      <title>Realizational Morphology in a Modular <fixed-case>Minimalist</fixed-case> <fixed-case>G</fixed-case>rammar</title>
+      <author><first>Edward P.</first><last>Stabler</last></author>
+      <pages>1–15</pages>
+      <pdf hash="46d7be7d"/>
+      <bibkey>stabler-2025-realizational</bibkey>
+    </paper>
+    <paper id="2">
+      <!-- https://aclanthology.org/2025.mol-1.2/ -->
+      <title>The Typology of <fixed-case>TSL</fixed-case> Case Assignment</title>
+      <author><first>Kenneth</first><last>Hanson</last></author>
+      <pages>16–32</pages>
+      <pdf hash="fdaf48fa"/>
+      <bibkey>hanson-2025-typology</bibkey>
+    </paper>
+  </volume>
+</collection>

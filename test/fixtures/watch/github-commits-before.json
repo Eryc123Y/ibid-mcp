@@ -1,0 +1,11 @@
+[
+  {
+    "sha": "a75fcdc07381dca29654bb8fc588e7bc1cd34c95",
+    "commit": {
+      "committer": {
+        "date": "2026-10-12T19:19:22Z"
+      },
+      "message": "update protect.py to run on volume <meta> titles, and run on all data (#10258)"
+    }
+  }
+]

@@ -55,8 +55,10 @@ export async function enrichDois(
   const found = new Map<string, Enrichment>();
   if (!dois.length) return found;
   if (!ctx.openalexKeyed) {
-    ctx.warn(
-      "OPENALEX_API_KEY is not set: journal papers go out without OpenAlex abstracts, open-access links or arXiv IDs",
+    await ctx.memo("openalex-unkeyed", async () =>
+      ctx.warn(
+        "OPENALEX_API_KEY is not set: papers found by DOI go out without OpenAlex abstracts, open-access links or arXiv IDs",
+      ),
     );
     return found;
   }
