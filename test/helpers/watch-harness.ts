@@ -49,7 +49,8 @@ export function harness(
     env,
     readFile: async (file) => {
       const found = store.get(file);
-      if (found === undefined) throw new Error(`ENOENT ${file}`);
+      if (found === undefined)
+        throw Object.assign(new Error(`ENOENT ${file}`), { code: "ENOENT" });
       return found;
     },
     writeFile: async (file, body) => {

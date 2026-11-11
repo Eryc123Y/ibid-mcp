@@ -192,3 +192,35 @@ it("matches DOI prefixes only at a boundary", () => {
     true,
   );
 });
+
+it("warns when Crossref's page cap cuts a registrant's listing short", async () => {
+  const items = Array.from({ length: 200 }, (_, i) => ({
+    DOI: `10.1234/other.${i}`,
+    title: [`Other ${i}`],
+    created: { "date-time": "2026-07-02T00:00:00Z" },
+    published: { "date-parts": [[2026, 7, 2]] },
+    type: "journal-article",
+  }));
+  const h = harness(
+    [{ name: "Big", kind: "journal", doi_prefix: "10.1234/ABC" }],
+    [
+      {
+        match: host("doi.org"),
+        respond: () => json([{ DOI: "10.1234", RA: "Crossref" }]),
+      },
+      {
+        match: host("api.crossref.org"),
+        respond: () => json({ message: { items, "next-cursor": "more" } }),
+      },
+    ],
+  );
+  expect(await h.run(["--since", "2026-07-01", "--venues", "list.json"])).toBe(
+    0,
+  );
+  expect(
+    h.calls.filter((c) => c.url.hostname === "api.crossref.org"),
+  ).toHaveLength(50);
+  expect(h.stderr()).toContain(
+    "Big: Crossref listed at least 10000 works under 10.1234 in the window; some of the series may be missing",
+  );
+});

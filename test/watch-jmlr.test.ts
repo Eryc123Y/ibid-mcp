@@ -1,6 +1,7 @@
 import { beforeEach, expect, it } from "vitest";
 import { clearMemoryCache } from "../src/http/cache";
 import { jmlrItems } from "../cli/watch/jmlr";
+import { runWatch, type WatchDeps } from "../cli/watch/run";
 import { fixture, harness, host, text } from "./helpers/watch-harness";
 
 beforeEach(() => clearMemoryCache());
@@ -19,6 +20,10 @@ const feed = {
   match: host("www.jmlr.org"),
   respond: () => text(fixture("jmlr.xml")),
 };
+
+/** Runs the harness with some dependencies replaced. */
+const runWatchWith = (h: { deps: WatchDeps }, overrides: Partial<WatchDeps>) =>
+  runWatch(ARGS, { ...h.deps, ...overrides });
 
 const ledger = (seen: Record<string, string>) =>
   JSON.stringify({ about: "x", seen });
@@ -44,7 +49,7 @@ it("records a baseline on the first run and emits no JMLR papers", async () => {
   expect(h.calls.map((c) => c.url.hostname)).toEqual(["www.jmlr.org"]);
 });
 
-it("emits papers first seen in the window, dated by the day they were first seen, and prunes the ledger", async () => {
+it("emits papers first seen in the window, dated by the day they were first seen, and keeps old ledger entries", async () => {
   const h = harness([JMLR], [feed], ENV, {
     [LEDGER]: ledger({
       "v27/26-1057": "2026-11-11",
@@ -88,6 +93,7 @@ it("emits papers first seen in the window, dated by the day they were first seen
     "v27/24-0652": "2026-11-12",
     "v27/26-1057": "2026-11-11",
     "v27/26-0847": "baseline",
+    "v26/old-1": "2026-01-01",
   });
 });
 
@@ -129,7 +135,7 @@ it("keeps the ledger when the feed fails or is empty, and needs a state director
   expect(nowhere.calls).toEqual([]);
 });
 
-it("treats an unreadable ledger as a first run", async () => {
+it("starts a new ledger when the old one is not JSON, but never resets one it cannot read", async () => {
   const h = harness(
     [JMLR],
     [feed],
@@ -141,6 +147,42 @@ it("treats an unreadable ledger as a first run", async () => {
   expect(h.files.get("/home/r/.config/litscout/watch-jmlr.json")).toContain(
     "baseline",
   );
+  expect(h.stderr()).toContain(
+    "JMLR: its ledger is not valid; starting a new one",
+  );
+
+  const blocked = harness([JMLR], [feed], ENV);
+  const denied = Object.assign(new Error("EACCES"), { code: "EACCES" });
+  expect(
+    await runWatchWith(blocked, {
+      readFile: async (file: string) => {
+        if (file === LEDGER) throw denied;
+        return blocked.files.get(file)!;
+      },
+    }),
+  ).toBe(0);
+  expect(blocked.err.join("")).toContain(
+    "JMLR: its ledger cannot be read; skipped",
+  );
+  expect(blocked.calls).toEqual([]);
+});
+
+it("still reports the papers when the ledger cannot be saved", async () => {
+  const h = harness([JMLR], [feed], ENV, {
+    [LEDGER]: ledger({ "v27/26-1057": "2026-11-01" }),
+  });
+  expect(
+    await runWatchWith(h, {
+      writeFile: async () => {
+        throw new Error("EROFS read-only file system /secret/path");
+      },
+    }),
+  ).toBe(0);
+  expect(h.lines()).toHaveLength(3);
+  expect(h.err.join("")).toContain(
+    "JMLR: could not save its ledger; these papers will be reported again",
+  );
+  expect(h.err.join("")).not.toContain("/secret/path");
 });
 
 it("parses the RSS feed", () => {

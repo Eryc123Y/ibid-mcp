@@ -80,19 +80,45 @@ function ledgerPath(ctx: WatchContext): string | null {
     : null;
 }
 
+/**
+ * The ledger, or null when there is none yet. A ledger that cannot be read fails the venue, so a
+ * permission problem never resets it; one that is not valid JSON starts again with a warning.
+ */
 async function readLedger(
   ctx: WatchContext,
+  venue: Venue,
   file: string,
 ): Promise<Ledger | null> {
+  let text: string;
   try {
-    const data = JSON.parse(
-      await ctx.files.read(file),
-    ) as Partial<Ledger> | null;
-    return data && typeof data.seen === "object" && data.seen
-      ? (data as Ledger)
-      : null;
+    text = await ctx.files.read(file);
+  } catch (error) {
+    if ((error as { code?: unknown } | null)?.code === "ENOENT") return null;
+    throw new SkipVenue("its ledger cannot be read");
+  }
+  try {
+    const data = JSON.parse(text) as Partial<Ledger> | null;
+    if (data && typeof data.seen === "object" && data.seen)
+      return data as Ledger;
   } catch {
-    return null;
+    // not JSON: start again below
+  }
+  ctx.warn(`${venue.name}: its ledger is not valid; starting a new one`);
+  return null;
+}
+
+async function save(
+  ctx: WatchContext,
+  venue: Venue,
+  file: string,
+  ledger: Ledger,
+): Promise<void> {
+  try {
+    await ctx.files.write!(file, `${JSON.stringify(ledger, null, 2)}\n`);
+  } catch {
+    ctx.warn(
+      `${venue.name}: could not save its ledger; these papers will be reported again`,
+    );
   }
 }
 
@@ -119,22 +145,20 @@ export async function jmlrLines(
   const file = ledgerPath(ctx);
   if (!file)
     throw new SkipVenue("no state directory (set LITSCOUT_STATE_DIR or HOME)");
-  const previous = await readLedger(ctx, file);
+  const previous = await readLedger(ctx, venue, file);
   const items = jmlrItems(await ctx.http.text(FEED, { service: "JMLR" }));
   if (!items.length) return [];
-  const seen = Object.fromEntries(
-    items.map((i) => [
-      i.id,
-      previous ? (previous.seen[i.id] ?? ctx.today) : BASELINE,
-    ]),
-  );
+  // Old entries stay (a few hundred a year), so a paper that drops out of the feed and comes back
+  // is not reported twice.
+  const seen: Record<string, string> = { ...previous?.seen };
+  for (const item of items) seen[item.id] ??= previous ? ctx.today : BASELINE;
   const ledger: Ledger = {
     about:
       "Papers litscout watch has seen in jmlr.org's RSS feed, with the day each first appeared.",
     seen,
   };
   if (JSON.stringify(ledger.seen) !== JSON.stringify(previous?.seen))
-    await ctx.files.write!(file, `${JSON.stringify(ledger, null, 2)}\n`);
+    await save(ctx, venue, file, ledger);
   if (!previous) {
     ctx.warn(
       `${venue.name}: first run; ${items.length} papers in jmlr.org's feed recorded as seen, new ones are reported from the next run`,

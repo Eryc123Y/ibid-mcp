@@ -9,7 +9,14 @@
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { normalizeDoi } from "../../src/core/normalize";
 import { plainText } from "../../src/sources/crossref";
-import { inWindow, lastDay, years, type WatchContext } from "./context";
+import { HttpError } from "../../src/http/json";
+import {
+  inWindow,
+  lastDay,
+  nextDay,
+  years,
+  type WatchContext,
+} from "./context";
 import { enrichDois } from "./enrich";
 import { DataError } from "./http";
 import { dayOrNull, isNonArticleTitle, type FeedLine } from "./line";
@@ -69,7 +76,9 @@ function paper(
   volume: Node,
   raw: Node,
 ): AnthologyPaper | null {
-  const id = `${collection}-${String(volume["@_id"])}.${String(raw["@_id"])}`;
+  const [vol, num] = [volume["@_id"], raw["@_id"]];
+  if (typeof vol !== "string" || typeof num !== "string") return null;
+  const id = `${collection}-${vol}.${num}`;
   const title = markup(raw.title);
   if (!title || !/^[\w.-]+$/.test(id)) return null;
   return {
@@ -125,10 +134,20 @@ async function lastCommit(
     per_page: "1",
     ...range,
   });
-  const list = await ctx.http.json<Commit[]>(`${COMMITS}?${params}`, {
-    service: "GitHub",
-    headers: githubHeaders(ctx),
-  });
+  const list = await ctx.http
+    .json<Commit[]>(`${COMMITS}?${params}`, {
+      service: "GitHub",
+      headers: githubHeaders(ctx),
+    })
+    .catch(async (error: unknown) => {
+      if (error instanceof HttpError && [403, 429].includes(error.status))
+        await ctx.memo("github-refused", async () =>
+          ctx.warn(
+            `GitHub refused a commit lookup (HTTP ${error.status}); without GITHUB_TOKEN it allows 60 an hour`,
+          ),
+        );
+      throw error;
+    });
   const first = Array.isArray(list) ? list[0] : undefined;
   const sha = first?.sha ?? "";
   const day = dayOrNull(first?.commit?.committer?.date);
@@ -167,7 +186,7 @@ async function fileLines(
   const { since, until } = ctx.window;
   const after = await lastCommit(ctx, file, {
     since: `${since}T00:00:00Z`,
-    ...(until ? { until: `${until}T23:59:59Z` } : {}),
+    ...(until ? { until: `${nextDay(until)}T00:00:00Z` } : {}),
   });
   if (!after) return [];
   const before = await lastCommit(ctx, file, { until: `${since}T00:00:00Z` });

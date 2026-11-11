@@ -7,6 +7,8 @@
 
 import { normalizeDoi } from "../../src/core/normalize";
 import {
+  MAX_PAGES as CROSSREF_PAGES,
+  ROWS,
   createdDay,
   plainText,
   publishedDay,
@@ -156,6 +158,10 @@ async function datacite(
       (page.data ?? []).length && next?.startsWith(`${DATACITE}?`)
         ? next
         : undefined;
+    if (url && n === MAX_PAGES - 1)
+      ctx.warn(
+        `${venue.name}: DataCite listed more than ${MAX_PAGES * PAGE_SIZE} DOIs; the rest are left out`,
+      );
   }
   const extra = await enrichDois(
     ctx,
@@ -184,6 +190,10 @@ async function crossref(
     registrant,
     ctx.window,
   );
+  if (items.length >= CROSSREF_PAGES * ROWS)
+    ctx.warn(
+      `${venue.name}: Crossref listed at least ${CROSSREF_PAGES * ROWS} works under ${registrant} in the window; some of the series may be missing`,
+    );
   const found = items.flatMap((item) => {
     const kept = keep(item);
     return kept &&

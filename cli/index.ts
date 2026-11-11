@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { fetchVenueTables } from "./fetch-venues";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -19,8 +19,13 @@ if (argv[0] === "watch") {
     writeFile: async (file, text) => {
       await mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
       const temporary = `${file}.${crypto.randomUUID()}.tmp`;
-      await writeFile(temporary, text, { mode: 0o600, flag: "wx" });
-      await rename(temporary, file);
+      try {
+        await writeFile(temporary, text, { mode: 0o600, flag: "wx" });
+        await rename(temporary, file);
+      } catch (error) {
+        await rm(temporary, { force: true });
+        throw error;
+      }
     },
     stdout: (text) => process.stdout.write(text),
     stderr: (text) => process.stderr.write(text),

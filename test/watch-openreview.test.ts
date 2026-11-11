@@ -220,3 +220,27 @@ it("expands {year} over the window and leaves fixed ids alone", () => {
     "rl-conference.cc/RLC/2027/Conference",
   ]);
 });
+
+it("stops at the page cap and says so when notes carry no dates", async () => {
+  const undated = Array.from({ length: 1000 }, (_, i) =>
+    note(`U${i}`, undefined),
+  );
+  const h = harness(
+    [{ name: "TMLR", kind: "journal", openreview: "TMLR" }],
+    [
+      {
+        match: host("api2.openreview.net"),
+        respond: () => json({ notes: undated }),
+      },
+    ],
+    { OPENREVIEW_TOKEN: "or-secret" },
+  );
+  expect(await h.run(["--since", "2026-06-01", "--venues", "list.json"])).toBe(
+    0,
+  );
+  expect(h.calls).toHaveLength(10);
+  expect(h.stderr()).toContain(
+    "TMLR: more than 10000 accepted notes; the rest are left out",
+  );
+  expect(h.lines()).toEqual([]);
+});

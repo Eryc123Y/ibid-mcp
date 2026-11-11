@@ -286,3 +286,33 @@ it("selects main volumes per venue and parses Anthology XML into papers", () => 
   expect(anthologyPapers('<collection id="x"/>', "acl")).toEqual([]);
   expect(() => anthologyPapers("<collection", "acl")).toThrow();
 });
+
+it("bounds the window with --until and hints at GITHUB_TOKEN when GitHub refuses", async () => {
+  const h = harness(
+    [TACL],
+    [
+      {
+        match: host("api.github.com"),
+        respond: () => json({ message: "API rate limit exceeded" }, 403),
+      },
+    ],
+  );
+  expect(
+    await h.run([
+      "--since",
+      "2026-10-20",
+      "--until",
+      "2026-10-31",
+      "--venues",
+      "list.json",
+    ]),
+  ).toBe(1);
+  expect(h.calls[0]!.url.searchParams.get("until")).toBe(
+    "2026-11-01T00:00:00Z",
+  );
+  const stderr = h.stderr();
+  expect(
+    stderr.match(/GitHub refused a commit lookup \(HTTP 403\)/g),
+  ).toHaveLength(1);
+  expect(stderr).toContain("without GITHUB_TOKEN it allows 60 an hour");
+});

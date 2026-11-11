@@ -80,9 +80,14 @@ const textField = (note: OpenReviewNote, key: string) => {
     : null;
 };
 
+/** Largest time a JavaScript Date can hold, in ms. */
+const MAX_TIME = 8.64e15;
+
 function noteDay(note: OpenReviewNote): string | null {
   const ms = note.pdate ?? note.odate;
-  return typeof ms === "number" && Number.isFinite(ms)
+  return typeof ms === "number" &&
+    Number.isFinite(ms) &&
+    Math.abs(ms) <= MAX_TIME
     ? new Date(ms).toISOString().slice(0, 10)
     : null;
 }
@@ -124,7 +129,13 @@ async function accepted(
   venueid: string,
 ) {
   const notes: OpenReviewNote[] = [];
-  for (let n = 0; n < MAX_PAGES; n += 1) {
+  for (let n = 0; ; n += 1) {
+    if (n === MAX_PAGES) {
+      ctx.warn(
+        `${venueid}: more than ${MAX_PAGES * PAGE} accepted notes; the rest are left out`,
+      );
+      break;
+    }
     const page = (await api.venueNotes(venueid, n * PAGE, PAGE)).notes ?? [];
     notes.push(...page);
     const days = page.map(noteDay).filter((d): d is string => d !== null);
