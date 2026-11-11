@@ -1,0 +1,10 @@
+{
+  "recorded_at": "2026-11-10T18:21:58.112Z",
+  "url": "https://api.semanticscholar.org/graph/v1/paper/batch?fields=corpusId,externalIds,title,year,venue,authors,citationCount,openAccessPdf",
+  "status": 429,
+  "headers": {},
+  "body": {
+    "message": "Too Many Requests. Please wait and try again or apply for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+    "code": "429"
+  }
+}

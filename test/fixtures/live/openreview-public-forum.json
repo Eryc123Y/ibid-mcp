@@ -1,0 +1,14 @@
+{
+  "recorded_at": "2026-11-10T18:22:53.161Z",
+  "url": "https://api2.openreview.net/notes?forum=ljNZyrAlaa&limit=100&offset=0",
+  "status": 403,
+  "headers": {
+    "x-ratelimit-limit": "180",
+    "x-ratelimit-remaining": "177",
+    "x-ratelimit-reset": "1794335002"
+  },
+  "body": {
+    "name": "ChallengeRequiredError",
+    "status": 403
+  }
+}
