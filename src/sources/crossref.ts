@@ -138,34 +138,55 @@ export function createCrossrefClient(deps: CrossrefDeps) {
       },
     });
 
+  /** Every work matching the filter, all pages up to the cap. */
+  async function works(filter: string): Promise<CrossrefItem[]> {
+    const items: CrossrefItem[] = [];
+    let cursor: string | undefined = "*";
+    for (let n = 0; cursor && n < MAX_PAGES; n += 1) {
+      const params = new URLSearchParams({
+        filter,
+        select: SELECT,
+        rows: String(ROWS),
+        cursor,
+      });
+      if (deps.mailto) params.set("mailto", deps.mailto);
+      const body = await page(params);
+      const batch = body.message?.items ?? [];
+      items.push(...batch);
+      cursor =
+        batch.length === ROWS ? body.message?.["next-cursor"] : undefined;
+    }
+    return items;
+  }
+
+  const created = (window: CreatedWindow) => [
+    `from-created-date:${window.since}`,
+    ...(window.until ? [`until-created-date:${window.until}`] : []),
+  ];
+
   return {
     /** Every work with one of the ISSNs whose DOI was registered in the window, all pages. */
-    async worksByIssn(
+    worksByIssn(
       issns: readonly string[],
       window: CreatedWindow,
     ): Promise<CrossrefItem[]> {
-      const filter = [
-        ...issns.map((issn) => `issn:${issn.replace(/[,]/g, "")}`),
-        `from-created-date:${window.since}`,
-        ...(window.until ? [`until-created-date:${window.until}`] : []),
-      ].join(",");
-      const items: CrossrefItem[] = [];
-      let cursor: string | undefined = "*";
-      for (let n = 0; cursor && n < MAX_PAGES; n += 1) {
-        const params = new URLSearchParams({
-          filter,
-          select: SELECT,
-          rows: String(ROWS),
-          cursor,
-        });
-        if (deps.mailto) params.set("mailto", deps.mailto);
-        const body = await page(params);
-        const batch = body.message?.items ?? [];
-        items.push(...batch);
-        cursor =
-          batch.length === ROWS ? body.message?.["next-cursor"] : undefined;
-      }
-      return items;
+      return works(
+        [
+          ...issns.map((issn) => `issn:${issn.replace(/[,]/g, "")}`),
+          ...created(window),
+        ].join(","),
+      );
+    },
+    /** Every work under a registrant prefix (e.g. 10.1145) registered in the window. */
+    worksByPrefix(
+      registrant: string,
+      window: CreatedWindow,
+    ): Promise<CrossrefItem[]> {
+      return works(
+        [`prefix:${registrant.replace(/[,]/g, "")}`, ...created(window)].join(
+          ",",
+        ),
+      );
     },
   };
 }

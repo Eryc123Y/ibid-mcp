@@ -1,0 +1,62 @@
+
+- title: 'Conference on Learning Theory 2026: Preface'
+  volume: 336
+  URL: https://proceedings.mlr.press/v336/hanneke26a.html
+  PDF: https://raw.githubusercontent.com/mlresearch/v336/main/assets/hanneke26a/hanneke26a.pdf
+  edit: https://github.com/mlresearch//v336/edit/gh-pages/_posts/2026-06-29-hanneke26a.md
+  series: 'Proceedings of Machine Learning Research'
+  container-title: 'Proceedings of Thirty Ninth Conference on Learning Theory'
+  publisher: 'PMLR'
+  author: 
+  - given: Steve
+    family: Hanneke
+  - given: Tor
+    family: Lattimore
+  editor: 
+  - given: Steve
+    family: Hanneke
+  - given: Tor
+    family: Lattimore
+  page: i-i
+  id: hanneke26a
+  issued:
+    date-parts: 
+      - 2026
+      - 6
+      - 29
+  firstpage: i
+  lastpage: i
+  published: 2026-06-29 00:00:00 +0000
+- title: 'How fast can you find a good hypothesis?'
+  abstract: 'Synthetic abstract 1 with a {Brace} and an apostrophe: it''s fine.'
+  volume: 336
+  URL: https://proceedings.mlr.press/v336/aamand26a.html
+  PDF: https://raw.githubusercontent.com/mlresearch/v336/main/assets/aamand26a/aamand26a.pdf
+  edit: https://github.com/mlresearch//v336/edit/gh-pages/_posts/2026-06-29-aamand26a.md
+  series: 'Proceedings of Machine Learning Research'
+  container-title: 'Proceedings of Thirty Ninth Conference on Learning Theory'
+  publisher: 'PMLR'
+  author: 
+  - given: Anders
+    family: Aamand
+  - given: Maryam
+    family: Aliakbarpour
+  - given: Justin Y.
+    family: Chen
+  - given: Sandeep
+    family: Silwal
+  editor: 
+  - given: Steve
+    family: Hanneke
+  - given: Tor
+    family: Lattimore
+  page: 1-2
+  id: aamand26a
+  issued:
+    date-parts: 
+      - 2026
+      - 6
+      - 29
+  firstpage: 1
+  lastpage: 2
+  published: 2026-06-29 00:00:00 +0000

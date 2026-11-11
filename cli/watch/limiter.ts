@@ -16,16 +16,16 @@ export interface LocalLimiter {
   readonly penalize: (ms: number) => Promise<void>;
 }
 
-export function localLimiter(
-  source: LimitedSource,
+/** Spaces calls at least `intervalMs` apart and honours penalties from 429 responses. */
+export function intervalLimiter(
+  intervalMs: number,
   sleep: (ms: number) => Promise<void>,
   now: () => number = Date.now,
 ): LocalLimiter {
   let state = INITIAL_STATE;
-  const interval = sourceInterval(source, true);
   return {
     async acquire() {
-      const next = reserve(state, now(), interval, NO_LIMIT_MS);
+      const next = reserve(state, now(), intervalMs, NO_LIMIT_MS);
       state = next.state;
       if (next.result.ok && next.result.waitMs > 0)
         await sleep(next.result.waitMs);
@@ -34,4 +34,12 @@ export function localLimiter(
       state = penalize(state, now(), ms);
     },
   };
+}
+
+export function localLimiter(
+  source: LimitedSource,
+  sleep: (ms: number) => Promise<void>,
+  now: () => number = Date.now,
+): LocalLimiter {
+  return intervalLimiter(sourceInterval(source, true), sleep, now);
 }

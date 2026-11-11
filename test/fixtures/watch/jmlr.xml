@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<atom:link href="http://jmlr.org/jmlr.xml" rel="self" type="application/rss+xml" />
+<link>http://www.jmlr.org</link>
+<title>JMLR</title>
+<description>Journal of Machine Learning Research</description>
+
+<item>
+<title>
+Semidefinite programming relaxations and debiasing for MAXCUT-based clustering
+</title>
+<link>
+http://jmlr.org/papers/v27/25-1670.html
+</link>
+<pdf>
+http://jmlr.org/papers/volume27/25-1670/25-1670.pdf
+</pdf>
+<pubDate>2026</pubDate>
+<author>Shuheng Zhou</author>
+<description>
+Synthetic abstract 0 with $x^2$ and &lt;strong&gt;bold&lt;/strong&gt; text.
+</description>
+</item>
+
+<item>
+<title>
+Sample-Efficient Regret-Minimizing Double Oracle in Two-Player Zero-Sum Extensive-Form Games
+</title>
+<link>
+http://jmlr.org/papers/v27/24-0652.html
+</link>
+<pdf>
+http://jmlr.org/papers/volume27/24-0652/24-0652.pdf
+</pdf>
+<pubDate>2026</pubDate>
+<author>Xiaohang Tang, Chiyuan Wang, Chengdong Ma, Ilija Bogunovic, Stephen McAleer, Yaodong Yang</author>
+<description>
+Synthetic abstract 1 with $x^2$ and &lt;strong&gt;bold&lt;/strong&gt; text.
+</description>
+</item>
+
+<item>
+<title>
+CLASSIX: A High-Performance Library for Explainable~Clustering
+</title>
+<link>
+http://jmlr.org/papers/v27/26-1057.html
+</link>
+<pdf>
+http://jmlr.org/papers/volume27/26-1057/26-1057.pdf
+</pdf>
+<pubDate>2026</pubDate>
+<author>Xinye Chen, Stefan Güttel, Kaustubh Roy</author>
+<description>
+Synthetic abstract 2 with $x^2$ and &lt;strong&gt;bold&lt;/strong&gt; text.
+</description>
+</item>
+
+<item>
+<title>
+Bayesian Predictive Inference Beyond Martingales
+</title>
+<link>
+http://jmlr.org/papers/v27/26-0847.html
+</link>
+<pdf>
+http://jmlr.org/papers/volume27/26-0847/26-0847.pdf
+</pdf>
+<pubDate>2026</pubDate>
+<author>Marco Battiston, Lorenzo Cappello</author>
+<description>
+Synthetic abstract 3 with $x^2$ and &lt;strong&gt;bold&lt;/strong&gt; text.
+</description>
+</item>
+
+</channel>
+</rss>

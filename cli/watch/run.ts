@@ -9,22 +9,42 @@ import { createOpenAlexClient } from "../../src/sources/openalex";
 import { parseArgs, USAGE } from "./args";
 import { conferenceLines } from "./conferences";
 import type { WatchContext } from "./context";
+import { createHttp } from "./http";
 import { journalLines, type Outcome } from "./journals";
 import type { FeedLine } from "./line";
 import { localLimiter } from "./limiter";
+import { openreviewReady } from "./openreview";
+import { route } from "./route";
+import { readRouted } from "./sources";
 import { parseWatchList, WatchError, type Venue } from "./watchlist";
 
 export interface WatchDeps {
   readonly fetch: typeof fetch;
   readonly env: Readonly<Record<string, string | undefined>>;
   readonly readFile: (file: string) => Promise<string>;
+  /** Where watch keeps its JMLR ledger; without it JMLR venues are skipped. */
+  readonly writeFile?: (file: string, text: string) => Promise<void>;
   readonly stdout: (text: string) => void;
   readonly stderr: (text: string) => void;
   readonly sleep?: (ms: number) => Promise<void>;
+  readonly now?: () => Date;
 }
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const EMPTY: Outcome = { lines: [], attempted: 0, failed: 0, skipped: 0 };
+
+/** Request counts on the summary line; the first two always appear, the rest when used. */
+const HOSTS: ReadonlyArray<readonly [string, string]> = [
+  ["api.crossref.org", "Crossref"],
+  ["api.openalex.org", "OpenAlex"],
+  ["api.github.com", "GitHub"],
+  ["raw.githubusercontent.com", "ACL Anthology data"],
+  ["proceedings.mlr.press", "PMLR"],
+  ["api.datacite.org", "DataCite"],
+  ["doi.org", "doi.org"],
+  ["www.jmlr.org", "JMLR"],
+  ["api2.openreview.net", "OpenReview"],
+];
 
 /** fetch that counts requests per API host, so the run can report what it spent. */
 function counting(impl: typeof fetch, counts: Map<string, number>) {
@@ -48,8 +68,10 @@ function context(
   const mailto = deps.env.UNPAYWALL_EMAIL?.trim() || undefined;
   const crossrefLimit = localLimiter("crossref", sleep);
   const openalexLimit = localLimiter("openalex", sleep);
+  const memos = new Map<string, Promise<unknown>>();
   return {
     window,
+    today: (deps.now?.() ?? new Date()).toISOString().slice(0, 10),
     crossref: createCrossrefClient({
       mailto,
       fetchImpl,
@@ -66,6 +88,15 @@ function context(
     }),
     openalexKeyed: Boolean(apiKey),
     warn: (text) => deps.stderr(`litscout watch: ${text}\n`),
+    http: createHttp(fetchImpl, sleep),
+    env: deps.env,
+    files: { read: deps.readFile, write: deps.writeFile },
+    fetch: fetchImpl,
+    sleep,
+    memo: <T>(key: string, load: () => Promise<T>) => {
+      if (!memos.has(key)) memos.set(key, load());
+      return memos.get(key) as Promise<T>;
+    },
   };
 }
 
@@ -84,11 +115,32 @@ async function venues(
 }
 
 function summary(lines: readonly FeedLine[], counts: Map<string, number>) {
-  const n = (host: string) => counts.get(host) ?? 0;
   const abstracts = lines.filter((l) => l.abstract).length;
   const oa = lines.filter((l) => l.oa_url).length;
   const arxiv = lines.filter((l) => l.arxiv_id).length;
-  return `${lines.length} papers (${abstracts} with abstracts, ${oa} with open-access links, ${arxiv} with arXiv IDs); requests: Crossref ${n("api.crossref.org")}, OpenAlex ${n("api.openalex.org")}`;
+  const requests = HOSTS.filter(([host], i) => i < 2 || counts.get(host))
+    .map(([host, label]) => `${label} ${counts.get(host) ?? 0}`)
+    .join(", ");
+  return `${lines.length} papers (${abstracts} with abstracts, ${oa} with open-access links, ${arxiv} with arXiv IDs); requests: ${requests}`;
+}
+
+/** Venues the dedicated sources read, one outcome each; the rest go to the original paths. */
+async function routed(ctx: WatchContext, selected: readonly Venue[]) {
+  const ready = openreviewReady(ctx.env);
+  const legacy: Venue[] = [];
+  const outcomes: Outcome[] = [];
+  for (const venue of selected) {
+    const r = route(venue, ready);
+    if (r.kind === "legacy") {
+      if (r.note) ctx.warn(`${venue.name}: ${r.note}`);
+      legacy.push(venue);
+    } else if (r.kind === "skip") {
+      ctx.warn(`${venue.name}: ${r.reason}; skipped`);
+    } else {
+      outcomes.push(await readRouted(ctx, venue, r));
+    }
+  }
+  return { legacy, outcomes };
 }
 
 async function watch(
@@ -99,18 +151,22 @@ async function watch(
   const counts = new Map<string, number>();
   const ctx = context(deps, { since: args.since, until: args.until }, counts);
   const list = await venues(deps, args.venues, ctx.warn);
-  const of = (kind: Venue["kind"]) =>
-    args.kinds.includes(kind) ? list.filter((v) => v.kind === kind) : [];
+  const { legacy, outcomes } = await routed(
+    ctx,
+    list.filter((v) => args.kinds.includes(v.kind)),
+  );
+  const of = (kind: Venue["kind"]) => legacy.filter((v) => v.kind === kind);
   const journals = of("journal").length
     ? await journalLines(ctx, of("journal"))
     : EMPTY;
   const conferences = of("conference").length
     ? await conferenceLines(ctx, of("conference"))
     : EMPTY;
-  const lines = [...journals.lines, ...conferences.lines];
+  const all = [journals, conferences, ...outcomes];
+  const lines = all.flatMap((o) => o.lines);
   lines.forEach((line) => deps.stdout(`${JSON.stringify(line)}\n`));
-  const attempted = journals.attempted + conferences.attempted;
-  const failed = journals.failed + conferences.failed;
+  const attempted = all.reduce((n, o) => n + o.attempted, 0);
+  const failed = all.reduce((n, o) => n + o.failed, 0);
   ctx.warn(summary(lines, counts));
   if (!attempted)
     ctx.warn(`no venue of kind ${args.kinds.join(", ")} could be read`);

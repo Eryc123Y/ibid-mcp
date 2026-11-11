@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<collection id="2026.tacl">
+  <volume id="1" type="journal" ingest-date="2026-10-26">
+    <!-- https://aclanthology.org/2026.tacl-1/ -->
+    <meta>
+      <booktitle>Transactions of the <fixed-case>A</fixed-case>ssociation for <fixed-case>C</fixed-case>omputational <fixed-case>L</fixed-case>inguistics, Volume 14</booktitle>
+      <publisher>MIT Press</publisher>
+      <address>Cambridge, MA</address>
+      <year>2026</year>
+      <venue>tacl</venue>
+      <journal-volume>14</journal-volume>
+    </meta>
+    <paper id="1">
+      <!-- https://aclanthology.org/2026.tacl-1.1/ -->
+      <title><fixed-case>A</fixed-case>ctive<fixed-case>LLM</fixed-case>: Large Language Model-Based Active Learning for Textual Few-Shot Scenarios</title>
+      <author><first>Markus</first><last>Bayer</last></author>
+      <author><first>Justin</first><last>Lutz</last></author>
+      <author><first>Christian</first><last>Reuter</last></author>
+      <pages>1–22</pages>
+      <abstract>Synthetic abstract for paper 0: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="1930e9b3"/>
+      <doi>10.1162/tacl.a.63</doi>
+      <bibkey>bayer-etal-2026-activellm</bibkey>
+    </paper>
+    <paper id="2">
+      <!-- https://aclanthology.org/2026.tacl-1.2/ -->
+      <title><fixed-case>M</fixed-case>o<fixed-case>N</fixed-case>a<fixed-case>C</fixed-case>o: More Natural and Complex Questions for Reasoning Across Dozens of Documents</title>
+      <author><first>Tomer</first><last>Wolfson</last></author>
+      <author><first>Harsh</first><last>Trivedi</last></author>
+      <author><first>Mor</first><last>Geva</last></author>
+      <author><first>Yoav</first><last>Goldberg</last></author>
+      <author><first>Dan</first><last>Roth</last></author>
+      <author><first>Tushar</first><last>Khot</last></author>
+      <author><first>Ashish</first><last>Sabharwal</last></author>
+      <author><first>Reut</first><last>Tsarfaty</last></author>
+      <pages>23–46</pages>
+      <abstract>Synthetic abstract for paper 1: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="308dddd4"/>
+      <doi>10.1162/tacl.a.64</doi>
+      <bibkey>wolfson-etal-2026-monaco</bibkey>
+    </paper>
+    <paper id="112">
+      <!-- https://aclanthology.org/2026.tacl-1.112/ -->
+      <title>Learning-to-Context Slope: Evaluating In-Context Learning Effectiveness Beyond Performance Illusions</title>
+      <author><first>Dingzirui</first><last>Wang</last></author>
+      <author><first>Xuanliang</first><last>Zhang</last></author>
+      <author><first>Keyan</first><last>Xu</last></author>
+      <author><first>Qingfu</first><last>Zhu</last></author>
+      <author><first>Wanxiang</first><last>Che</last></author>
+      <author><first>Yang</first><last>Deng</last></author>
+      <pages>2399–2424</pages>
+      <abstract>Synthetic abstract for paper 2: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="c0e40a9b"/>
+      <doi>10.1162/tacl.a.809</doi>
+      <bibkey>wang-etal-2026-learning-context</bibkey>
+    </paper>
+    <paper id="113">
+      <!-- https://aclanthology.org/2026.tacl-1.113/ -->
+      <title>Byte-pair Encoding Captures Aspects of Word Meaning that Distributional Semantics Overlooks</title>
+      <author><first>David A.</first><last>Haslett</last></author>
+      <author><first>Antoni B.</first><last>Chan</last></author>
+      <author><first>Janet H.</first><last>Hsiao</last></author>
+      <pages>2425–2448</pages>
+      <abstract>Synthetic abstract for paper 3: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="6a75d52e"/>
+      <doi>10.1162/tacl.a.810</doi>
+      <bibkey>haslett-etal-2026-byte</bibkey>
+    </paper>
+    <paper id="114">
+      <!-- https://aclanthology.org/2026.tacl-1.114/ -->
+      <title>The Extractive-Abstractive Spectrum: Uncovering Verifiability Trade-offs in <fixed-case>LLM</fixed-case> Generations</title>
+      <author><first>Theodora</first><last>Worledge</last></author>
+      <author><first>Tatsunori</first><last>Hashimoto</last></author>
+      <author><first>Carlos</first><last>Guestrin</last></author>
+      <pages>2449–2474</pages>
+      <abstract>Synthetic abstract for paper 4: the recorded text is not committed. Uses <tex-math>O(n)</tex-math> &amp; <url>https://example.org</url>.</abstract>
+      <pdf hash="292abd4f"/>
+      <doi>10.1162/tacl.a.811</doi>
+      <bibkey>worledge-etal-2026-extractive</bibkey>
+    </paper>
+  </volume>
+</collection>

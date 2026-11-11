@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { fetchVenueTables } from "./fetch-venues";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,6 +15,13 @@ if (argv[0] === "watch") {
     fetch,
     env: process.env,
     readFile: (file) => readFile(file, "utf8"),
+    // State (the JMLR ledger) is replaced atomically, so a concurrent run never reads half a file.
+    writeFile: async (file, text) => {
+      await mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
+      const temporary = `${file}.${crypto.randomUUID()}.tmp`;
+      await writeFile(temporary, text, { mode: 0o600, flag: "wx" });
+      await rename(temporary, file);
+    },
     stdout: (text) => process.stdout.write(text),
     stderr: (text) => process.stderr.write(text),
   });

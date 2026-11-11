@@ -8,18 +8,56 @@ function normalizeArxiv(query: string): string | undefined {
   }
 }
 import { titleKey } from "../core/normalize";
-import { requestJson } from "../http/json";
+import { HttpError, requestJson } from "../http/json";
 export interface OpenReviewNote {
   id: string;
   forum?: string;
   invitations?: string[];
   content?: Record<string, unknown>;
+  /** Publication, online and creation times (ms since the epoch). */
+  pdate?: number | null;
+  odate?: number | null;
+  cdate?: number | null;
 }
 interface Deps {
   acquire: () => Promise<void>;
   penalize: (ms: number) => Promise<void>;
   onResponse?: (r: Response) => Promise<void>;
   fetchImpl?: typeof fetch;
+  sleep?: (ms: number) => Promise<void>;
+  /** API token; sent as a bearer token, never cached or logged. */
+  token?: string;
+}
+const API = "https://api2.openreview.net";
+/** A token for the API from an account login (POST /login). */
+export async function openReviewLogin(
+  username: string,
+  password: string,
+  deps: Pick<Deps, "fetchImpl" | "sleep" | "acquire" | "penalize">,
+): Promise<string> {
+  const body = await requestJson<{ token?: unknown }>({
+    service: "openreview",
+    url: `${API}/login`,
+    init: {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ id: username, password }),
+    },
+    retry: {
+      retries: 1,
+      baseDelayMs: 1000,
+      beforeAttempt: deps.acquire,
+      onThrottled: deps.penalize,
+      fetchImpl: deps.fetchImpl,
+      sleep: deps.sleep,
+    },
+  });
+  if (typeof body.token !== "string" || !body.token)
+    throw new HttpError(502, "openreview", "login returned no token");
+  return body.token;
 }
 function value(
   content: Record<string, unknown> | undefined,
@@ -119,7 +157,7 @@ export function createOpenReviewClient(deps: Deps) {
   async function get(path: string, params: Record<string, string>) {
     const qs = new URLSearchParams(params);
     qs.sort();
-    const url = `https://api2.openreview.net${path}?${qs}`;
+    const url = `${API}${path}?${qs}`;
     return requestJson<{ notes?: OpenReviewNote[]; count?: number }>({
       service: "openreview",
       url,
@@ -137,6 +175,34 @@ export function createOpenReviewClient(deps: Deps) {
     });
   }
   return {
+    /** One page of a venue's notes with `content.venueid` = venueid (accepted papers), newest first. */
+    async venueNotes(venueid: string, offset: number, limit: number) {
+      const qs = new URLSearchParams({
+        "content.venueid": venueid,
+        sort: "pdate:desc",
+        limit: String(limit),
+        offset: String(offset),
+      });
+      return requestJson<{ notes?: OpenReviewNote[]; count?: number }>({
+        service: "openreview",
+        url: `${API}/notes?${qs}`,
+        init: {
+          headers: {
+            accept: "application/json",
+            ...(deps.token ? { authorization: `Bearer ${deps.token}` } : {}),
+          },
+        },
+        retry: {
+          retries: 2,
+          baseDelayMs: 1000,
+          beforeAttempt: deps.acquire,
+          onThrottled: deps.penalize,
+          fetchImpl: deps.fetchImpl,
+          sleep: deps.sleep,
+        },
+        onResponse: deps.onResponse,
+      });
+    },
     async reviews(query: string, full = false) {
       const arxiv = normalizeArxiv(query);
       const forumUrl = query.startsWith("https://openreview.net/")
