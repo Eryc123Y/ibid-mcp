@@ -63,6 +63,7 @@ after installing a functional release.
 | `status` | Show endpoint, configured sources and last observed OpenAlex quota |
 | `keys` | Privately prompt for replacement source keys |
 | `destroy` | After a typed `yes`, remove the Worker and its OAuth KV namespace |
+| `watch --since YYYY-MM-DD --venues <file>` | Print new journal (and, with `--kinds`, conference) papers as JSON Lines; runs locally, no deployment needed |
 
 Local state and generated configuration live in `~/.config/litscout/`, with mode
 0700 for the directory and 0600 for state/config files. The management token is
@@ -70,6 +71,68 @@ stored locally; source keys remain only in Worker secrets after upload. The
 temporary secret file is mode 0600 and removed even when upload fails. Treat the
 local state file as a password. Keep it until a failed deployment or deletion is
 successfully retried.
+
+## Feeding LitScout Daily
+
+`litscout watch` is the feed command that
+[LitScout Daily](https://github.com/Eryc123Y/daily-arXiv-ai-enhanced) runs to put
+journal and conference papers beside its arXiv papers. It runs locally (no Worker,
+no deployment) and prints one JSON object per line on stdout, in the shape
+`summaries/feed.py` reads; progress, skipped venues and warnings go to stderr.
+
+```sh
+npm ci --ignore-scripts && npm run build
+node dist/cli/index.js watch --since 2026-11-10 --venues summaries/watchlist.json
+```
+
+Set this in LitScout Daily's environment (the pipeline appends `--since` and
+`--venues` itself):
+
+```sh
+FEED_COMMAND='["node", "/absolute/path/to/litscout-mcp/dist/cli/index.js", "watch"]'
+```
+
+| Option | Meaning |
+|---|---|
+| `--since YYYY-MM-DD` | Papers the source first listed on or after this day (required) |
+| `--venues <file>` | The watch list, `{"venues": [{"name", "kind", "issn"?, "openalex_source"?, "openreview_venues"?, "sources"?}]}`; other fields are ignored (required) |
+| `--kinds journal,conference` | Which venues to read; default `journal` |
+| `--until YYYY-MM-DD` | Last listing day to include |
+
+- **Journals** (venues with `issn`): Crossref works whose DOI was registered in
+  the window (`from-created-date`), paged with a cursor. Crossref lists a paper
+  the day its DOI is registered and has no quota. With `OPENALEX_API_KEY` set,
+  the DOIs are then looked up in OpenAlex, 50 per request, for the abstract,
+  open-access link and arXiv ID. Without the key, or when OpenAlex fails or its
+  quota is spent, the Crossref records still go out (with Crossref's abstract
+  when it has one) and stderr says why. `source` is `crossref`; `published` is
+  the Crossref publication date when it has a day, else the day the DOI was
+  registered (IEEE gives only a year).
+- **Not papers**: Crossref types other than `journal-article` and
+  `proceedings-article` (issues, components, peer reviews), and titles such as
+  editorials, errata, corrections ("Correction to ..."), retractions, front and
+  back matter, covers, tables of contents, issue or publication information,
+  information for authors, indexes, reviewer lists, obituaries and calls for
+  papers. OpenAlex conference works of type paratext, erratum, editorial,
+  retraction, peer-review or supplementary materials are dropped the same way.
+- **Conferences** (`--kinds conference`, venues with `openalex_source`): OpenAlex
+  works published since a year before `--since` whose OpenAlex `created_date` is
+  in the window, with `source` `openalex`. Proceedings arrive in yearly batches,
+  so one run can return hundreds of papers, and each run pages through the
+  venue's last year (a few OpenAlex requests per venue). Run it weekly, for
+  example with a second `FEED_COMMAND` ending in `"watch", "--kinds", "conference"`;
+  LitScout Daily caps what it publishes per run (`FEED_MAX_PER_RUN`).
+- **OpenReview** is not read yet: its API answers anonymous scripts with a
+  browser challenge, so it waits on an `OPENREVIEW_TOKEN`. A venue with only
+  `openreview_venues` is skipped with one stderr line. ECCV, which has no
+  OpenAlex source or ISSN of its own, is skipped too.
+- `UNPAYWALL_EMAIL`, when set, is sent to Crossref as the polite-pool `mailto`;
+  nothing else is sent by default. Keys come from the environment only and are
+  never printed.
+- Exit status: 0 when anything could be fetched (even no papers); 2 for bad
+  arguments or an unreadable venue file; 1 when every source request failed.
+  The last stderr line is the one-line reason. The last line of a successful
+  run counts papers, abstracts, open-access links and requests per source.
 
 ## Tools
 

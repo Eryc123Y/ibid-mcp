@@ -8,22 +8,14 @@ import {
   type LimiterState,
   type Reservation,
 } from "./schedule";
-export type LimitedSource = "s2" | "openalex" | "arxiv" | "openreview" | "core";
+import { sourceInterval, type LimitedSource } from "./intervals";
+export { sourceInterval, type LimitedSource } from "./intervals";
 interface Budget {
   remaining: number;
   limit: number;
   warning: boolean;
   observedAt: number;
   resetAt?: number;
-}
-export function sourceInterval(source: LimitedSource, keyed: boolean): number {
-  return {
-    s2: keyed ? 1000 : 3000,
-    openalex: 100,
-    arxiv: 3000,
-    openreview: 1000,
-    core: 1000,
-  }[source];
 }
 /** One instance per source, durable across evictions. Burst is conservatively one. */
 export class SourceLimiter extends DurableObject<AppEnv> {
