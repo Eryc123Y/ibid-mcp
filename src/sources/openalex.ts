@@ -62,7 +62,7 @@ interface RawAuthor {
 }
 
 interface ListResponse<T> {
-  readonly meta?: { count?: number };
+  readonly meta?: { count?: number; next_cursor?: string | null };
   readonly results?: T[];
 }
 
@@ -235,6 +235,25 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
       return {
         count: res.meta?.count ?? 0,
         papers: (res.results ?? []).map(mapWork),
+      };
+    },
+
+    /** One page of works with caller-chosen fields; `cursor` pages deeply ("*" starts). */
+    async worksPage<T>(opts: {
+      filter: string;
+      select: string;
+      perPage: number;
+      cursor?: string;
+    }): Promise<{ results: T[]; nextCursor?: string }> {
+      const res = await get<ListResponse<T>>("/works", {
+        filter: opts.filter,
+        select: opts.select,
+        per_page: opts.perPage,
+        cursor: opts.cursor,
+      });
+      return {
+        results: res.results ?? [],
+        nextCursor: res.meta?.next_cursor ?? undefined,
       };
     },
 
