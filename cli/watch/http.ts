@@ -18,6 +18,12 @@ const HOST_INTERVAL_MS: Readonly<Record<string, number>> = {
   "api.datacite.org": 500,
   "doi.org": 500,
   "www.jmlr.org": 1000,
+  // litscout abstracts: Europe PMC publishes no limit; IEEE allows 10 calls a second (and a
+  // daily quota), Elsevier's Abstract Retrieval 9 a second; Springer's free plan is the tightest.
+  "www.ebi.ac.uk": 250,
+  "ieeexploreapi.ieee.org": 500,
+  "api.springernature.com": 1000,
+  "api.elsevier.com": 250,
 };
 const DOWNLOAD_TIMEOUT_MS = 60_000;
 
@@ -26,6 +32,10 @@ export interface Request {
   readonly headers?: Readonly<Record<string, string>>;
   readonly method?: "GET" | "POST";
   readonly body?: string;
+  /** Per-attempt timeout; default 60 s (enough for large downloads). */
+  readonly timeoutMs?: number;
+  /** "error" for requests that carry a key, so no redirect can take it to another host. */
+  readonly redirect?: "follow" | "error" | "manual";
 }
 
 export interface Http {
@@ -60,8 +70,9 @@ export function createHttp(
       {
         method: req.method ?? "GET",
         body: req.body,
+        redirect: req.redirect,
         headers: { "user-agent": USER_AGENT, ...req.headers },
-        signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+        signal: AbortSignal.timeout(req.timeoutMs ?? DOWNLOAD_TIMEOUT_MS),
       },
       {
         retries: 2,

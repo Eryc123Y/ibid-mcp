@@ -64,9 +64,45 @@ export function parseArxiv(xml: string): { papers: Paper[]; total: number } {
       }),
   };
 }
-export function createArxivClient(deps: { fetchImpl: typeof fetch }) {
+export interface ArxivDeps {
+  readonly fetchImpl: typeof fetch;
+  /** Waits for a slot; arXiv asks for one request every three seconds. */
+  readonly acquire?: () => Promise<void>;
+  readonly sleep?: (ms: number) => Promise<void>;
+}
+
+/** Letters, digits and spaces only: safe inside an arXiv quoted phrase. */
+function phrase(text: string): string {
+  return text
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function createArxivClient(deps: ArxivDeps) {
+  const query = async (qs: URLSearchParams) => {
+    const url = `https://export.arxiv.org/api/query?${qs}`;
+    const body = await cached(`GET ${url}`, 600, async () => {
+      const res = await fetchWithRetry(
+        url,
+        {},
+        {
+          retries: 1,
+          baseDelayMs: 3000,
+          fetchImpl: deps.fetchImpl,
+          sleep: deps.sleep,
+          beforeAttempt: deps.acquire,
+        },
+      );
+      if (!res.ok) throw new HttpError(res.status, "arxiv", "Request failed");
+      const body = await res.text();
+      parseArxiv(body);
+      return { body, cacheable: true };
+    });
+    return parseArxiv(body);
+  };
   return {
-    async search(args: ArxivArgs) {
+    search(args: ArxivArgs) {
       const terms = [];
       if (args.query.trim())
         terms.push(`all:"${args.query.replace(/["\\]/g, " ")}"`);
@@ -79,26 +115,39 @@ export function createArxivClient(deps: { fetchImpl: typeof fetch }) {
         terms.push(
           `submittedDate:[${args.year_from ?? 1991}01010000 TO ${args.year_to ?? 2100}12312359]`,
         );
-      const qs = new URLSearchParams({
-        search_query: terms.join(" AND "),
-        start: String(args.offset),
-        max_results: String(args.limit),
-        sortBy: args.recent || args.category ? "submittedDate" : "relevance",
-        sortOrder: "descending",
-      });
-      const url = `https://export.arxiv.org/api/query?${qs}`;
-      const body = await cached(`GET ${url}`, 600, async () => {
-        const res = await fetchWithRetry(
-          url,
-          {},
-          { retries: 1, baseDelayMs: 3000, fetchImpl: deps.fetchImpl },
-        );
-        if (!res.ok) throw new HttpError(res.status, "arxiv", "Request failed");
-        const body = await res.text();
-        parseArxiv(body);
-        return { body, cacheable: true };
-      });
-      return parseArxiv(body);
+      return query(
+        new URLSearchParams({
+          search_query: terms.join(" AND "),
+          start: String(args.offset),
+          max_results: String(args.limit),
+          sortBy: args.recent || args.category ? "submittedDate" : "relevance",
+          sortOrder: "descending",
+        }),
+      );
+    },
+    /** Papers by arXiv id (without version), one request. */
+    async byIds(ids: readonly string[]): Promise<Paper[]> {
+      if (ids.length === 0) return [];
+      const result = await query(
+        new URLSearchParams({
+          id_list: ids.join(","),
+          max_results: String(ids.length),
+        }),
+      );
+      return result.papers;
+    },
+    /** Candidates for an exact-title match (`ti:"..."`); the caller compares titles. */
+    async byTitle(title: string, limit: number): Promise<Paper[]> {
+      const words = phrase(title);
+      if (!words) return [];
+      const result = await query(
+        new URLSearchParams({
+          search_query: `ti:"${words}"`,
+          start: "0",
+          max_results: String(limit),
+        }),
+      );
+      return result.papers;
     },
   };
 }
