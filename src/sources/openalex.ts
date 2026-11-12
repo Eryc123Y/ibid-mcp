@@ -5,7 +5,7 @@
  * a small `per_page`, and OR-batched filters (up to 100 values).
  */
 
-import { normalizeDoi } from "../core/normalize";
+import { doiPath, normalizeDoi } from "../core/normalize";
 import type { AuthorRecord, Notice, Paper } from "../core/types";
 import { requestJson } from "../http/json";
 
@@ -285,6 +285,15 @@ export function createOpenAlexClient(deps: OpenAlexDeps) {
         }
       }
       return out;
+    },
+
+    /**
+     * One work by DOI (`GET /works/doi:<doi>`) with caller-chosen fields. Unlike a `doi:` filter
+     * this also finds a journal version merged into its arXiv preprint, whose primary DOI is the
+     * arXiv one. A DOI OpenAlex does not know is an HttpError 404.
+     */
+    workByDoi<T>(doi: string, select: string): Promise<T> {
+      return get<T>(`/works/doi:${doiPath(doi)}`, { select });
     },
 
     citingWorks(workId: string, limit: number, page: number) {

@@ -35,6 +35,18 @@ export interface S2Deps {
   readonly fetchImpl?: typeof fetch;
   readonly sleep?: (ms: number) => Promise<void>;
   readonly onResponse?: (response: Response) => Promise<void>;
+  /** Overrides the default of two retries, 1 s apart, capped at 8 s. */
+  readonly retry?: {
+    readonly retries: number;
+    readonly baseDelayMs: number;
+    readonly maxDelayMs?: number;
+  };
+}
+
+/** What `abstractBatch` returns per id. */
+export interface S2Abstract {
+  readonly abstract?: string | null;
+  readonly externalIds?: Record<string, string | number> | null;
 }
 
 interface RawAuthor {
@@ -113,8 +125,9 @@ export function createS2Client(deps: S2Deps) {
   const headers: Record<string, string> = { accept: "application/json" };
   if (deps.apiKey) headers["x-api-key"] = deps.apiKey;
   const retry = {
-    retries: 2,
-    baseDelayMs: 1000,
+    retries: deps.retry?.retries ?? 2,
+    baseDelayMs: deps.retry?.baseDelayMs ?? 1000,
+    maxDelayMs: deps.retry?.maxDelayMs,
     beforeAttempt: deps.acquire,
     onThrottled: deps.penalize,
     fetchImpl: deps.fetchImpl,
@@ -230,6 +243,18 @@ export function createS2Client(deps: S2Deps) {
         ids.slice(0, 500),
       );
       return res.map((p) => (p ? mapS2Paper(p) : null));
+    },
+
+    /** Abstract and external ids for up to 500 ids, aligned with `ids` (null = not found). */
+    async abstractBatch(
+      ids: readonly string[],
+    ): Promise<Array<S2Abstract | null>> {
+      if (ids.length === 0) return [];
+      return post<Array<S2Abstract | null>>(
+        "/paper/batch",
+        "abstract,externalIds",
+        ids.slice(0, 500),
+      );
     },
 
     async links(

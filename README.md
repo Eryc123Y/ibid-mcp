@@ -64,6 +64,7 @@ after installing a functional release.
 | `keys` | Privately prompt for replacement source keys |
 | `destroy` | After a typed `yes`, remove the Worker and its OAuth KV namespace |
 | `watch --since YYYY-MM-DD --venues <file>` | Print new journal (and, with `--kinds`, conference) papers as JSON Lines; runs locally, no deployment needed |
+| `abstracts < items.jsonl` | Fill missing abstracts for feed papers (JSON Lines in and out); runs locally |
 
 Local state and generated configuration live in `~/.config/litscout/`, with mode
 0700 for the directory and 0600 for state/config files. The management token is
@@ -157,6 +158,68 @@ FEED_COMMAND='["node", "/absolute/path/to/litscout-mcp/dist/cli/index.js", "watc
   stop the others. The last stderr line is the one-line reason. The last line
   of a successful run counts papers, abstracts, open-access links and requests
   per source.
+
+### Filling missing abstracts
+
+IEEE and Springer do not deposit abstracts in Crossref, and OpenAlex and
+Semantic Scholar can lag by weeks, so some feed papers arrive without one.
+`litscout abstracts` looks them up, from official APIs only.
+
+```sh
+printf '%s\n' '{"id": "p1", "doi": "10.1109/tpami.2026.3750433"}' \
+  | node dist/cli/index.js abstracts
+```
+
+- **stdin:** JSON Lines, at most 200, each
+  `{"id": string, "doi"?: string, "arxiv"?: string, "title"?: string}`. `id`
+  is opaque and echoed back; `null` counts as absent; blank lines are ignored.
+  A DOI or arXiv ID that cannot be recognised (or a DOI over 300 characters, a
+  title over 1,000) is ignored rather than rejected; an arXiv DOI
+  (`10.48550/arXiv.<id>`) also counts as the arXiv ID.
+- **stdout:** exactly one line per input line, in input order:
+  `{"id": string, "abstract": string | null, "source": "openalex" | "s2" | "arxiv" | "crossref" | "europepmc" | "ieee" | "springer" | "elsevier" | null}`.
+  Nothing else is written to stdout.
+- **Order** (each item stops at the first hit):
+  1. OpenAlex, `GET /works/doi:<doi>` per DOI (this also finds journal versions
+     merged into their arXiv preprint, which a `doi:` filter misses); the
+     abstract is rebuilt from `abstract_inverted_index`, and an arXiv ID in its
+     locations is kept for step 3.
+  2. Semantic Scholar, one `POST /graph/v1/paper/batch` with every remaining DOI
+     (`fields=abstract,externalIds`; `S2_API_KEY` when set). A 429 waits and is
+     retried once, then S2 is skipped. `externalIds.ArXiv` is kept for step 3.
+  3. arXiv export API, by ID (input, OpenAlex or S2) in one `id_list` request;
+     without an ID, by exact title (`ti:"..."`), accepted only when the titles
+     are equal after case, accents, punctuation and spacing are ignored. One
+     request every three seconds, as arXiv asks.
+  4. Crossref, `GET /works/<doi>`, field `abstract`.
+  5. Europe PMC, `search?query=DOI:"<doi>"&resultType=core`, field `abstractText`
+     (PLOS, eLife, neuroscience journals).
+  6. Publisher APIs, only with their key set (otherwise skipped without a word):
+     IEEE Xplore Metadata API (`IEEE_API_KEY`) for `10.1109/` DOIs, Springer
+     Nature Meta API v2 (`SPRINGER_API_KEY`) for `10.1007/`, Elsevier Abstract
+     Retrieval (`ELSEVIER_API_KEY`, sent as a header) for `10.1016/`.
+- **Text:** plain text, with JATS and HTML tags stripped, entities decoded,
+  whitespace collapsed, and a leading "Abstract" heading and publisher
+  copyright lines removed. Anything under 100 characters, or a placeholder such
+  as "No abstract available", is discarded and the next source is tried.
+- **Failures:** a request that fails (timeout, 429, 5xx, unreadable data) skips
+  that source for that item, and later sources still try. "Not found" is not a
+  failure. After three failures in a row a source is left alone for the rest
+  of the run, and its remaining lookups count as skipped. Items that repeat a
+  DOI share one request. A run stops making requests after 15 minutes and
+  still answers every item (the summary then ends with "time budget spent").
+  Requests that carry a publisher key refuse redirects. stderr gets one
+  summary line: items, how many were filled from each source, and the number
+  of skipped requests. It never contains URLs, keys or exception text.
+- **Exit status:** 0 whenever the run completes, even if nothing is found; 2
+  for bad input (invalid JSON, a line that is not an object with a string
+  `id`, more than 200 lines, more than 1 MB) or any argument other than
+  `--help`; 1 only for an internal error, with nothing on stdout.
+- **Cost:** OpenAlex and Crossref get one request per DOI still missing,
+  Europe PMC one per DOI left after Crossref, S2 one in all, arXiv one per 50
+  IDs plus one per title search (three seconds each, so 30 title searches take
+  about a minute and a half). `OPENALEX_API_KEY` and `UNPAYWALL_EMAIL` are used
+  as in `watch`.
 
 ## Tools
 

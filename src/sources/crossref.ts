@@ -4,7 +4,7 @@
  * go through the caller's limiter, and page with Crossref's deep-paging cursor.
  */
 
-import { normalizeDoi } from "../core/normalize";
+import { doiPath, normalizeDoi } from "../core/normalize";
 import { requestJson } from "../http/json";
 
 const BASE = "https://api.crossref.org/works";
@@ -85,7 +85,8 @@ const ENTITIES: Record<string, string> = {
 export function plainText(markup: string | null | undefined): string | null {
   const text = (markup ?? "")
     .replace(/<jats:title>\s*Abstract\s*<\/jats:title>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
+    // Real tags only: a bare "<" in "p < 0.05 and n > 10" is text, not markup.
+    .replace(/<\/?[a-z][\w:.-]*(?:\s[^<>]*)?\/?>/gi, " ")
     .replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/gi, (whole, code: string) => {
       if (code.startsWith("#x"))
         return String.fromCodePoint(parseInt(code.slice(2), 16));
@@ -116,10 +117,10 @@ export interface CreatedWindow {
 }
 
 export function createCrossrefClient(deps: CrossrefDeps) {
-  const page = (params: URLSearchParams) =>
-    requestJson<Page>({
+  const request = <T>(url: string) =>
+    requestJson<T>({
       service: "Crossref",
-      url: `${BASE}?${params.toString()}`,
+      url,
       init: {
         headers: {
           accept: "application/json",
@@ -150,7 +151,7 @@ export function createCrossrefClient(deps: CrossrefDeps) {
         cursor,
       });
       if (deps.mailto) params.set("mailto", deps.mailto);
-      const body = await page(params);
+      const body: Page = await request<Page>(`${BASE}?${params.toString()}`);
       const batch = body.message?.items ?? [];
       items.push(...batch);
       cursor =
@@ -165,6 +166,16 @@ export function createCrossrefClient(deps: CrossrefDeps) {
   ];
 
   return {
+    /** One work by DOI (`GET /works/<doi>`); a DOI Crossref does not know is an HttpError 404. */
+    async work(doi: string): Promise<CrossrefItem | null> {
+      const params = new URLSearchParams();
+      if (deps.mailto) params.set("mailto", deps.mailto);
+      const query = params.size ? `?${params.toString()}` : "";
+      const body = await request<{ message?: CrossrefItem }>(
+        `${BASE}/${doiPath(doi)}${query}`,
+      );
+      return body.message ?? null;
+    },
     /** Every work with one of the ISSNs whose DOI was registered in the window, all pages. */
     worksByIssn(
       issns: readonly string[],

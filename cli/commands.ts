@@ -173,7 +173,7 @@ export async function runCli(
   const [command, id, ...extra] = args;
   if (!command || ["help", "--help", "-h"].includes(command)) {
     deps.print(
-      `LitScout: ${commands.join(", ")}, watch\nKeys are entered privately, never as arguments.\nwatch --since YYYY-MM-DD --venues <file>: journal and conference papers as JSON Lines (see README).`,
+      `LitScout: ${commands.join(", ")}, watch, abstracts\nKeys are entered privately, never as arguments.\nwatch --since YYYY-MM-DD --venues <file>: journal and conference papers as JSON Lines (see README).\nabstracts < items.jsonl: fill missing abstracts by DOI, arXiv ID or title, JSON Lines in and out (see README).`,
     );
     return;
   }

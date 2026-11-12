@@ -82,6 +82,11 @@ export function normalizeDoi(
   return cleaned.startsWith("10.") ? cleaned : undefined;
 }
 
+/** A DOI for a URL path: every reserved character escaped except the "/" that DOIs need. */
+export function doiPath(doi: string): string {
+  return encodeURIComponent(doi).replace(/%2F/gi, "/");
+}
+
 /** All dedupe keys for a paper: its DOI, its arXiv id and its title. */
 export function paperKeys(
   paper: Pick<Paper, "doi" | "arxiv" | "title" | "year">,
